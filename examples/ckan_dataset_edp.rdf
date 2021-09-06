@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="utf-8"?>
+<rdf:RDF
+  xmlns:foaf="http://xmlns.com/foaf/0.1/"
+  xmlns:owl="http://www.w3.org/2002/07/owl#"
+  xmlns:dcatap="http://data.europa.eu/r5r/"
+  xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+  xmlns:dcat="http://www.w3.org/ns/dcat#"
+  xmlns:dct="http://purl.org/dc/terms/"
+  xmlns:skos="http://www.w3.org/2004/02/skos/core#"
+  xmlns:vcard="http://www.w3.org/2006/vcard/ns#"
+>
+  <dcat:Dataset rdf:about="http://955401ec-4384-4610-97ce-44d7c4324619/dataset/cf3dcff7-34ae-4fab-a202-2f17e3153b2f">
+    <dct:identifier>cf3dcff7-34ae-4fab-a202-2f17e3153b2f</dct:identifier>
+    <dcat:distribution>
+      <dcat:Distribution rdf:about="http://ad2ba73f-3ca7-4968-a35d-0feab97eaec9/dataset/cf3dcff7-34ae-4fab-a202-2f17e3153b2f/resource/9871734c-d261-4d66-96de-cfce6ddf8a31">
+        <dct:title>Example Resource</dct:title>
+        <dcat:accessURL rdf:resource="http://localhost/accessURL"/>
+        <dct:format rdf:resource="http://publications.europa.eu/resource/authority/file-type/JSON"/>
+        <dct:description>Example description of Example Resource</dct:description>
+        <dcat:mediaType rdf:resource="https://www.iana.org/assignments/media-types/application/json"/>
+        <dcat:downloadURL rdf:resource="http://localhost/downloadURL"/>
+        <dct:license rdf:resource="http://publications.europa.eu/resource/authority/licence/CC_BY_4_0"/>
+        <dcat:byteSize rdf:datatype="http://www.w3.org/2001/XMLSchema#decimal">200000000.0</dcat:byteSize>
+        <dcatap:availability rdf:resource="http://dcat-ap.de/def/plannedAvailability/stable"/>
+      </dcat:Distribution>
+    </dcat:distribution>
+    <dcat:theme rdf:resource="http://publications.europa.eu/resource/authority/data-theme/EDUC"/>
+    <dcat:keyword>newTag2</dcat:keyword>
+    <dcat:contactPoint>
+      <vcard:Kind rdf:about="http://localhost/ContactUri">
+        <vcard:fn>MaintainerName ExampleSurname</vcard:fn>
+        <vcard:hasEmail rdf:resource="mailto:maintainer@email.com"/>
+      </vcard:Kind>
+    </dcat:contactPoint>
+    <dct:title>examplepackage</dct:title>
+    <dcat:keyword>newTag</dcat:keyword>
+    <dct:temporal>
+      <dct:PeriodOfTime rdf:nodeID="N3dd43139d1904f78b2643f9f6003d4da">
+        <dcat:startDate rdf:datatype="http://www.w3.org/2001/XMLSchema#dateTime">2021-05-25T15:01:07.173973</dcat:startDate>
+        <dcat:endDate rdf:datatype="http://www.w3.org/2001/XMLSchema#dateTime">2021-06-25T15:01:07.173973</dcat:endDate>
+      </dct:PeriodOfTime>
+    </dct:temporal>
+    <dcat:landingPage>
+      <foaf:Document rdf:about="http://localhost/landingpageExample.es"/>
+    </dcat:landingPage>
+    <dct:spatial>
+      <dct:Location rdf:about="http://sws.geonames.org/3114965">
+        <dcat:bbox rdf:datatype="http://www.opengis.net/ont/geosparql#wktLiteral">POLYGON ((175.0000 17.5000, -65.5000 17.5000, -65.5000 72.0000, 175.0000 72.0000, 175.0000 17.5000))</dcat:bbox>
+        <skos:inScheme rdf:resource="http://sws.geonames.org"/>
+      </dct:Location>
+    </dct:spatial>
+    <dct:description>Description example of dataset test</dct:description>
+    <dcat:theme rdf:resource="http://publications.europa.eu/resource/authority/data-theme/ECON"/>
+    <dct:publisher>
+      <foaf:Agent rdf:about="http://publications.europa.eu/resource/authority/corporate-body/SPC">
+        <dct:type rdf:resource="http://purl.org/adms/publishertype/Academia-ScientificOrganisation"/>
+        <foaf:name>exampleorg</foaf:name>
+      </foaf:Agent>
+    </dct:publisher>
+    <dct:modified rdf:datatype="http://www.w3.org/2001/XMLSchema#dateTime">2021-07-08T12:08:15.177991</dct:modified>
+    <dct:issued rdf:datatype="http://www.w3.org/2001/XMLSchema#dateTime">2021-07-08T11:31:11.500592</dct:issued>
+    <owl:versionInfo>2.0</owl:versionInfo>
+  </dcat:Dataset>
+  <dct:MediaType rdf:about="https://www.iana.org/assignments/media-types/application/json"/>
+  <dct:MediaTypeOrExtent rdf:about="http://publications.europa.eu/resource/authority/file-type/JSON"/>
+  <dct:LicenseDocument rdf:about="http://publications.europa.eu/resource/authority/licence/CC_BY_4_0">
+    <dct:type rdf:resource="http://purl.org/adms/licencetype/PublicDomain"/>
+  </dct:LicenseDocument>
+</rdf:RDF>
+

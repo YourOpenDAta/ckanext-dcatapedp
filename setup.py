@@ -80,7 +80,9 @@ setup(
     # pip to create the appropriate form of executable for the target platform.
     entry_points='''
         [ckan.plugins]
-        dcatapedp=ckanext.dcatapedp.plugin:DcatapedpPlugin
+
+        [ckan.rdf.profiles]
+        edp_dcat_ap=ckanext.dcatapedp.profiles:EDPDCATAPProfile
 
         [babel.extractors]
         ckan = ckan.lib.extract:extract_ckan
