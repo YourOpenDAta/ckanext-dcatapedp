@@ -2,8 +2,6 @@ from builtins import str
 from builtins import object
 import json
 
-import pytest
-
 from dateutil.parser import parse as parse_date
 
 from geomet import wkt
@@ -12,11 +10,13 @@ from rdflib import URIRef, BNode, Literal
 
 from ckantoolkit.tests import helpers, factories
 
+from ckan.plugins import toolkit
+
 from ckanext.dcat import utils
 from ckanext.dcat.processors import RDFSerializer
 from ckanext.dcatapedp.profiles import (
-    DCT, DCT_TYPE, DCAT, DCATAP, ADMS, VCARD, FOAF, SCHEMA, TIME, LOCN, GSP,
-    OWL, SPDX, SKOS, EU_CORPORATE_BODY_SCHEMA_URI, GEO_SCHEMA_URI, GEOJSON_IMT)
+    DCT, DCAT, DCATAP, ADMS, VCARD, FOAF, SCHEMA, TIME, LOCN, GSP,
+    SKOS, EU_CORPORATE_BODY_SCHEMA_URI, GEO_SCHEMA_URI, GEOJSON_IMT)
 from rdflib.namespace import Namespace, RDF, XSD, RDFS
 
 
@@ -139,6 +139,38 @@ class TestEDPDCATAPProfileSerializeDataset(BaseSerializeTest):
         schema = URIRef(EU_CORPORATE_BODY_SCHEMA_URI)
         assert self._triple(g, publisher, SKOS.inScheme, schema)
 
+    def test_contact_point(self):
+
+        dataset = self._get_base_dataset()
+        dataset['extras'].extend([
+            {
+                'key': 'contact_email',
+                'value': 'maintainer@email.com'
+            },
+            {
+                'key': 'contact_name',
+                'value': 'MaintainerName ExampleSurname'
+            },
+            {
+                'key': 'contact_uri',
+                'value': 'http://example.com/ContactUri'
+            }
+        ])
+
+        extras = self._extras(dataset)
+
+        s = RDFSerializer(profiles=['euro_dcat_ap', 'edp_dcat_ap'])
+        g = s.g
+        dataset_ref = s.graph_from_dataset(dataset)
+
+        contactPoint = self._triple(
+            g, dataset_ref, DCAT.contactPoint, URIRef(extras['contact_uri']))[2]
+        assert contactPoint
+        assert self._triple(g, contactPoint, RDF.type, VCARD.Kind)
+        assert self._triple(g, contactPoint, VCARD.fn, extras['contact_name'])
+        assert self._triple(g, contactPoint, VCARD['hasEmail'], URIRef(
+            'mailto:' + extras['contact_email']))
+
     def test_temporal(self):
 
         dataset = self._get_base_dataset()
@@ -179,6 +211,10 @@ class TestEDPDCATAPProfileSerializeDataset(BaseSerializeTest):
                 'value': '{"type": "Polygon", "coordinates": [[[40.457569, -3.741816], [40.467191, -3.649810], [40.387186, -3.660789], [40.380491, -3.803974]]]}'
             },
             {
+                'key': 'spatial_centroid',
+                'value': '{"type": "Point", "coordinates": [40.423123, -3.762345]}'
+            },
+            {
                 'key': 'spatial_uri',
                 'value': 'http://sws.geonames.org/6544494'
             }
@@ -204,6 +240,11 @@ class TestEDPDCATAPProfileSerializeDataset(BaseSerializeTest):
 
         wkt_geom = wkt.dumps(json.loads(extras['spatial']), decimals=4)
         assert self._triple(g, spatial, DCAT.bbox, wkt_geom, GSP.wktLiteral)
+
+        wkt_spatial = wkt.dumps(json.loads(
+            extras['spatial_centroid']), decimals=4)
+        assert self._triple(g, spatial, DCAT.centroid,
+                            wkt_spatial, GSP.wktLiteral)
 
     def test_spatial_uri_not_GEO_SCHEMA(self):
 
@@ -232,12 +273,16 @@ class TestEDPDCATAPProfileSerializeDataset(BaseSerializeTest):
     def test_spatial_no_wkt(self):
 
         dataset = self._get_base_dataset()
-        dataset['extras'].append(
+        dataset['extras'].extend([
             {
                 'key': 'spatial',
                 'value': 'NoWKT'
+            },
+            {
+                'key': 'spatial_centroid',
+                'value': 'NoWKT'
             }
-        )
+        ])
         extras = self._extras(dataset)
 
         s = RDFSerializer(profiles=['euro_dcat_ap', 'edp_dcat_ap'])
@@ -252,6 +297,8 @@ class TestEDPDCATAPProfileSerializeDataset(BaseSerializeTest):
         assert not self._triple(g, spatial, DCAT.bbox, None)
         assert self._triple(g, spatial, LOCN.geometry,
                             extras['spatial'], GEOJSON_IMT)
+
+        assert not self._triple(g, spatial, DCAT.centroid, None)
 
     def test_graph_from_resource(self):
 
@@ -283,134 +330,141 @@ class TestEDPDCATAPProfileSerializeDataset(BaseSerializeTest):
 
             assert self._triple(g, distribution, RDF.type, DCAT.Distribution)
 
-    def test_distribution_mediaType_with_mimetype(self):
-        dataset, resource = self._get_base_dataset_and_resource()
-        resource['mimetype'] = 'application/json'
+    if toolkit.check_ckan_version(min_version='2.3'):
 
-        s = RDFSerializer(profiles=['euro_dcat_ap', 'edp_dcat_ap'])
-        g = s.g
-        dataset_ref = s.graph_from_dataset(dataset)
-        distribution = self._triple(g, dataset_ref, DCAT.distribution, None)[2]
-        assert str(distribution) == utils.resource_uri(resource)
+        def test_distribution_mediaType_with_mimetype(self):
+            dataset, resource = self._get_base_dataset_and_resource()
+            resource['mimetype'] = 'application/json'
 
-        IANA_media_type_json = 'https://www.iana.org/assignments/media-types/application/json'
-        media_type = self._triple(
-            g, distribution, DCAT.mediaType, URIRef(IANA_media_type_json))[2]
-        assert media_type
-        assert self._triple(g, media_type, RDF.type, DCT.MediaType)
+            s = RDFSerializer(profiles=['euro_dcat_ap', 'edp_dcat_ap'])
+            g = s.g
+            dataset_ref = s.graph_from_dataset(dataset)
+            distribution = self._triple(
+                g, dataset_ref, DCAT.distribution, None)[2]
+            assert str(distribution) == utils.resource_uri(resource)
 
-    def test_distribution_mediaType_with_format(self):
-        dataset, resource = self._get_base_dataset_and_resource()
-        resource['format'] = 'JSON'
+            IANA_media_type_json = 'https://www.iana.org/assignments/media-types/application/json'
+            media_type = self._triple(
+                g, distribution, DCAT.mediaType, URIRef(IANA_media_type_json))[2]
+            assert media_type
+            assert self._triple(g, media_type, RDF.type, DCT.MediaType)
 
-        s = RDFSerializer(profiles=['euro_dcat_ap', 'edp_dcat_ap'])
-        g = s.g
-        dataset_ref = s.graph_from_dataset(dataset)
-        distribution = self._triple(g, dataset_ref, DCAT.distribution, None)[2]
-        assert str(distribution) == utils.resource_uri(resource)
+        def test_distribution_mediaType_with_format(self):
+            dataset, resource = self._get_base_dataset_and_resource()
+            resource['format'] = 'JSON'
 
-        IANA_media_type_json = 'https://www.iana.org/assignments/media-types/application/json'
-        media_type = self._triple(
-            g, distribution, DCAT.mediaType, URIRef(IANA_media_type_json))[2]
-        assert media_type
-        assert self._triple(g, media_type, RDF.type, DCT.MediaType)
+            s = RDFSerializer(profiles=['euro_dcat_ap', 'edp_dcat_ap'])
+            g = s.g
+            dataset_ref = s.graph_from_dataset(dataset)
+            distribution = self._triple(
+                g, dataset_ref, DCAT.distribution, None)[2]
+            assert str(distribution) == utils.resource_uri(resource)
 
+            IANA_media_type_json = 'https://www.iana.org/assignments/media-types/application/json'
+            media_type = self._triple(
+                g, distribution, DCAT.mediaType, URIRef(IANA_media_type_json))[2]
+            assert media_type
+            assert self._triple(g, media_type, RDF.type, DCT.MediaType)
 
-    def test_distribution_mediaType_not_exist(self):
-        dataset, resource = self._get_base_dataset_and_resource()
-        resource['mimetype'] = 'NOTEXIST'
+        def test_distribution_mediaType_not_exist(self):
+            dataset, resource = self._get_base_dataset_and_resource()
+            resource['mimetype'] = 'NOTEXIST'
 
-        s = RDFSerializer(profiles=['euro_dcat_ap', 'edp_dcat_ap'])
-        g = s.g
-        dataset_ref = s.graph_from_dataset(dataset)
-        distribution = self._triple(g, dataset_ref, DCAT.distribution, None)[2]
-        assert str(distribution) == utils.resource_uri(resource)
+            s = RDFSerializer(profiles=['euro_dcat_ap', 'edp_dcat_ap'])
+            g = s.g
+            dataset_ref = s.graph_from_dataset(dataset)
+            distribution = self._triple(
+                g, dataset_ref, DCAT.distribution, None)[2]
+            assert str(distribution) == utils.resource_uri(resource)
 
-        # If not found in IANA media types it uses the default definition from euro_dcat_ap profile
-        media_type = self._triple(
-            g, distribution, DCAT.mediaType, resource['mimetype'])[2]
-        assert media_type
+            # If not found in IANA media types it uses the default definition from euro_dcat_ap profile
+            media_type = self._triple(
+                g, distribution, DCAT.mediaType, resource['mimetype'])[2]
+            assert media_type
 
+        def test_distribution_format_with_mimetype(self):
+            dataset, resource = self._get_base_dataset_and_resource()
+            resource['mimetype'] = 'application/json'
 
-    def test_distribution_format_with_mimetype(self):
-        dataset, resource = self._get_base_dataset_and_resource()
-        resource['mimetype'] = 'application/json'
+            s = RDFSerializer(profiles=['euro_dcat_ap', 'edp_dcat_ap'])
+            g = s.g
+            dataset_ref = s.graph_from_dataset(dataset)
+            distribution = self._triple(
+                g, dataset_ref, DCAT.distribution, None)[2]
+            assert str(distribution) == utils.resource_uri(resource)
 
-        s = RDFSerializer(profiles=['euro_dcat_ap', 'edp_dcat_ap'])
-        g = s.g
-        dataset_ref = s.graph_from_dataset(dataset)
-        distribution = self._triple(g, dataset_ref, DCAT.distribution, None)[2]
-        assert str(distribution) == utils.resource_uri(resource)
+            EU_format_type_json = 'http://publications.europa.eu/resource/authority/file-type/JSON'
+            format_type = self._triple(
+                g, distribution, DCT['format'], URIRef(EU_format_type_json))[2]
+            assert format_type
+            assert self._triple(g, format_type, RDF.type,
+                                DCT.MediaTypeOrExtent)
 
-        EU_format_type_json = 'http://publications.europa.eu/resource/authority/file-type/JSON'
-        format_type = self._triple(g, distribution, DCT['format'], URIRef(EU_format_type_json))[2]
-        assert format_type
-        assert self._triple(g, format_type, RDF.type, DCT.MediaTypeOrExtent)
+        def test_distribution_format_with_format(self):
+            dataset, resource = self._get_base_dataset_and_resource()
+            resource['format'] = 'JSON'
 
+            s = RDFSerializer(profiles=['euro_dcat_ap', 'edp_dcat_ap'])
+            g = s.g
+            dataset_ref = s.graph_from_dataset(dataset)
+            distribution = self._triple(
+                g, dataset_ref, DCAT.distribution, None)[2]
+            assert str(distribution) == utils.resource_uri(resource)
 
-    def test_distribution_format_with_format(self):
-        dataset, resource = self._get_base_dataset_and_resource()
-        resource['format'] = 'JSON'
+            EU_format_type_json = 'http://publications.europa.eu/resource/authority/file-type/JSON'
+            format_type = self._triple(
+                g, distribution, DCT['format'], URIRef(EU_format_type_json))[2]
+            assert format_type
+            assert self._triple(g, format_type, RDF.type,
+                                DCT.MediaTypeOrExtent)
 
-        s = RDFSerializer(profiles=['euro_dcat_ap', 'edp_dcat_ap'])
-        g = s.g
-        dataset_ref = s.graph_from_dataset(dataset)
-        distribution = self._triple(g, dataset_ref, DCAT.distribution, None)[2]
-        assert str(distribution) == utils.resource_uri(resource)
+        def test_distribution_format_not_exist(self):
+            dataset, resource = self._get_base_dataset_and_resource()
+            resource['format'] = 'NOTEXIST'
 
-        EU_format_type_json = 'http://publications.europa.eu/resource/authority/file-type/JSON'
-        format_type = self._triple(
-            g, distribution, DCT['format'], URIRef(EU_format_type_json))[2]
-        assert format_type
-        assert self._triple(g, format_type, RDF.type, DCT.MediaTypeOrExtent)
+            s = RDFSerializer(profiles=['euro_dcat_ap', 'edp_dcat_ap'])
+            g = s.g
+            dataset_ref = s.graph_from_dataset(dataset)
+            distribution = self._triple(
+                g, dataset_ref, DCAT.distribution, None)[2]
+            assert str(distribution) == utils.resource_uri(resource)
 
+            # If not found in EU format types it uses the default definition from euro_dcat_ap profile
+            format_type = self._triple(
+                g, distribution, DCT['format'], resource['format'])[2]
+            assert format_type
 
-    def test_distribution_mediaType_not_exist(self):
-        dataset, resource = self._get_base_dataset_and_resource()
-        resource['format'] = 'NOTEXIST'
+        def test_distribution_mediaType_and_format_with_mimetype_and_format(self):
+            dataset, resource = self._get_base_dataset_and_resource()
+            resource['mimetype'] = 'application/json'
+            resource['format'] = 'CSV'
 
-        s = RDFSerializer(profiles=['euro_dcat_ap', 'edp_dcat_ap'])
-        g = s.g
-        dataset_ref = s.graph_from_dataset(dataset)
-        distribution = self._triple(g, dataset_ref, DCAT.distribution, None)[2]
-        assert str(distribution) == utils.resource_uri(resource)
+            s = RDFSerializer(profiles=['euro_dcat_ap', 'edp_dcat_ap'])
+            g = s.g
+            dataset_ref = s.graph_from_dataset(dataset)
+            distribution = self._triple(
+                g, dataset_ref, DCAT.distribution, None)[2]
+            assert str(distribution) == utils.resource_uri(resource)
 
-        # If not found in EU format types it uses the default definition from euro_dcat_ap profile
-        format_type = self._triple(
-            g, distribution, DCT['format'], resource['format'])[2]
-        assert format_type
+            IANA_media_type_json = 'https://www.iana.org/assignments/media-types/application/json'
+            EU_format_type_csv = 'http://publications.europa.eu/resource/authority/file-type/CSV'
 
+            # Priority for mimetype in mediaType
+            media_type = self._triple(
+                g, distribution, DCAT.mediaType, URIRef(IANA_media_type_json))[2]
+            assert media_type
+            assert not self._triple(
+                g, distribution, DCAT.mediaType, URIRef(EU_format_type_csv))
+            assert self._triple(g, media_type, RDF.type, DCT.MediaType)
 
-    def test_distribution_mediaType_and_format_with_mimetype_and_format(self):
-        dataset, resource = self._get_base_dataset_and_resource()
-        resource['mimetype'] = 'application/json'
-        resource['format'] = 'CSV'
-
-        s = RDFSerializer(profiles=['euro_dcat_ap', 'edp_dcat_ap'])
-        g = s.g
-        dataset_ref = s.graph_from_dataset(dataset)
-        distribution = self._triple(g, dataset_ref, DCAT.distribution, None)[2]
-        assert str(distribution) == utils.resource_uri(resource)
-
-        IANA_media_type_json = 'https://www.iana.org/assignments/media-types/application/json'
-        EU_format_type_csv = 'http://publications.europa.eu/resource/authority/file-type/CSV'
-
-        # Priority for mimetype in mediaType
-        media_type = self._triple(
-            g, distribution, DCAT.mediaType, URIRef(IANA_media_type_json))[2]
-        assert media_type
-        assert not self._triple(
-            g, distribution, DCAT.mediaType, URIRef(EU_format_type_csv))
-        assert self._triple(g, media_type, RDF.type, DCT.MediaType)
-
-        # Priority for format in format
-        format_type = self._triple(
-            g, distribution, DCT['format'], URIRef(EU_format_type_csv))[2]
-        assert format_type
-        assert not self._triple(
-            g, distribution, DCT['format'], URIRef(IANA_media_type_json))
-        assert self._triple(g, format_type, RDF.type, DCT.MediaTypeOrExtent)
-
+            # Priority for format in format
+            format_type = self._triple(
+                g, distribution, DCT['format'], URIRef(EU_format_type_csv))[2]
+            assert format_type
+            assert not self._triple(
+                g, distribution, DCT['format'], URIRef(IANA_media_type_json))
+            assert self._triple(g, format_type, RDF.type,
+                                DCT.MediaTypeOrExtent)
 
     def test_distribution_license(self):
 
@@ -435,6 +489,30 @@ class TestEDPDCATAPProfileSerializeDataset(BaseSerializeTest):
         assert self._triple(g, license, RDF.type, DCT.LicenseDocument)
         assert self._triple(g, license, DCT.type, URIRef(license_type))
 
+    def test_distribution_license_literal(self):
+
+        dataset, resource = self._get_base_dataset_and_resource()
+        resource['license'] = 'CC_BY_4_0'
+        resource['extras'].append({
+            "key": "license_type",
+            "value": "PublicDomain"
+        })
+
+        extras = self._extras(resource)
+
+        s = RDFSerializer(profiles=['euro_dcat_ap', 'edp_dcat_ap'])
+        g = s.g
+        dataset_ref = s.graph_from_dataset(dataset)
+        distribution = self._triple(g, dataset_ref, DCAT.distribution, None)[2]
+        assert str(distribution) == utils.resource_uri(resource)
+
+        license = self._triple(g, distribution, DCT.license, None)[2]
+        assert isinstance(license, BNode)
+        assert self._triple(g, license, RDF.type, DCT.LicenseDocument)
+        assert self._triple(g, license, DCT.title,
+                            Literal(resource['license']))
+        assert self._triple(g, license, DCT.type,
+                            Literal(extras['license_type']))
 
     def test_distribution_license_only(self):
 
@@ -454,7 +532,6 @@ class TestEDPDCATAPProfileSerializeDataset(BaseSerializeTest):
         assert self._triple(g, license, RDF.type, DCT.LicenseDocument)
         assert not self._triple(g, license, DCT.type, None)
 
-    
     def test_distribution_license_type_only(self):
 
         dataset, resource = self._get_base_dataset_and_resource()
@@ -477,7 +554,6 @@ class TestEDPDCATAPProfileSerializeDataset(BaseSerializeTest):
         assert self._triple(g, license, RDF.type, DCT.LicenseDocument)
         assert self._triple(g, license, DCT.type, URIRef(license_type))
 
-
     def test_distribution_availability(self):
 
         dataset, resource = self._get_base_dataset_and_resource()
@@ -489,8 +565,8 @@ class TestEDPDCATAPProfileSerializeDataset(BaseSerializeTest):
         distribution = self._triple(g, dataset_ref, DCAT.distribution, None)[2]
         assert str(distribution) == utils.resource_uri(resource)
 
-        assert self._triple(g, distribution, DCATAP.availability, URIRef(resource['availability']))
-
+        assert self._triple(g, distribution, DCATAP.availability,
+                            URIRef(resource['availability']))
 
     def test_distribution_availability_literal(self):
 
@@ -503,8 +579,8 @@ class TestEDPDCATAPProfileSerializeDataset(BaseSerializeTest):
         distribution = self._triple(g, dataset_ref, DCAT.distribution, None)[2]
         assert str(distribution) == utils.resource_uri(resource)
 
-        assert self._triple(g, distribution, DCATAP.availability, resource['availability'])
-
+        assert self._triple(
+            g, distribution, DCATAP.availability, resource['availability'])
 
 
 class TestEDPDCATAPProfileSerializeCatalog(BaseSerializeTest):

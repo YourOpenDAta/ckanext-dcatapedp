@@ -46,6 +46,7 @@
     <dct:spatial>
       <dct:Location rdf:about="http://sws.geonames.org/3114965">
         <dcat:bbox rdf:datatype="http://www.opengis.net/ont/geosparql#wktLiteral">POLYGON ((175.0000 17.5000, -65.5000 17.5000, -65.5000 72.0000, 175.0000 72.0000, 175.0000 17.5000))</dcat:bbox>
+        <dcat:centroid rdf:datatype="http://www.opengis.net/ont/geosparql#wktLiteral">POINT (50.0000 40.0000)</dcat:centroid>
         <skos:inScheme rdf:resource="http://sws.geonames.org"/>
       </dct:Location>
     </dct:spatial>

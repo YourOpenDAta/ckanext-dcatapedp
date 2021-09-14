@@ -58,7 +58,6 @@ namespaces = {
 }
 
 
-
 class EDPDCATAPProfile(RDFProfile):
     '''
     An RDF profile for the EDP DCAT-AP recommendation for data portals
@@ -102,16 +101,16 @@ class EDPDCATAPProfile(RDFProfile):
 
         start_date = end_date = None
 
-        interval = self.g.value(subject, predicate)
-        if interval:
-            start_date = self.g.value(interval, DCAT.startDate)
-            end_date = self.g.value(interval, DCAT.endDate)
+        interval_ref = self.g.value(subject, predicate)
+        if interval_ref:
+            start_date = self._object_value(interval_ref, DCAT.startDate)
+            end_date = self._object_value(interval_ref, DCAT.endDate)
 
         return start_date, end_date
 
     def _spatial_edp(self, subject, predicate):
         '''
-        Returns geom with the value set to
+        Returns geom and centroid with the value set to
         None if they could not be found.
         Geometries are always returned in GeoJSON.
         WKT is transformed to GeoJSON.
@@ -120,34 +119,45 @@ class EDPDCATAPProfile(RDFProfile):
         '''
 
         geom = None
+        centr = None
 
-        spatial = self.g.value(subject, predicate)
-        if spatial and (spatial, RDF.type, DCT.Location) in self.g:
-            geometry = self.g.value(spatial, DCAT.bbox)
+        spatial_ref = self.g.value(subject, predicate)
+        if spatial_ref and (spatial_ref, RDF.type, DCT.Location) in self.g:
+            geometry = self.g.value(spatial_ref, DCAT.bbox)
+            centroid = self.g.value(spatial_ref, DCAT.centroid)
             if geometry and geometry.datatype == GSP.wktLiteral:
                 try:
                     geom = json.dumps(wkt.loads(str(geometry)))
                 except (ValueError, TypeError, InvalidGeoJSONException):
                     pass
+            if centroid and centroid.datatype == GSP.wktLiteral:
+                try:
+                    centr = json.dumps(wkt.loads(str(centroid)))
+                except (ValueError, TypeError, InvalidGeoJSONException):
+                    pass
 
-        return geom
+        return geom, centr
 
     def _distribution_license_edp(self, subject, predicate):
         '''
         Returns the license and the license type.
-        If the license is a BNode it returns None.
+        If the license is a BNode and not DCT.title it returns None.
         None if they could not be found.
         '''
 
-        license = self.g.value(subject, predicate)
-        licnese_type = None
-        if license:
-            license_type = self.g.value(license, DCT.type)
-            if isinstance(license, BNode):
-                license = None
-        return license, license_type    
+        license_ref = self.g.value(subject, predicate)
 
-    def _distribution_format_edp(self, subject):
+        license = None
+        license_type = None
+        if license_ref:
+            license_type = self._object_value(license_ref, DCT.type)
+            if isinstance(license_ref, BNode):
+                license = self._object_value(license_ref, DCT.title)
+            else:
+                license = str(license_ref)
+        return license, license_type
+
+    def _distribution_format_edp(self, subject, normalize_ckan_format=True):
         '''
         Returns the Internet Media Type and format label for a distribution.
         Extracts the Internet Media Type from IANA complete URI or EU file type complete URI.
@@ -161,20 +171,79 @@ class EDPDCATAPProfile(RDFProfile):
         imt_ref = self.g.value(subject, DCAT.mediaType)
         label_ref = self.g.value(subject, DCT['format'])
 
-        if imt_ref and IANA_FILETYPE_URI in imt_ref:
-            imt = imt_ref.replace(IANA_FILETYPE_URI, '')
-        if label_ref and EU_FILETYPE_URI in label_ref:
-            label_eu = label_ref.replace(EU_FILETYPE_URI, '')
-            label = unified_resource_format_ckan(label_eu.lower())
-            if not label:
-                label = label_eu
+        if ((imt_ref or label_ref) and normalize_ckan_format and
+                toolkit.check_ckan_version(min_version='2.3')):
+            if imt_ref and IANA_FILETYPE_URI in imt_ref:
+                imt = imt_ref.replace(IANA_FILETYPE_URI, '')
+            if label_ref and EU_FILETYPE_URI in label_ref:
+                label_eu = label_ref.replace(EU_FILETYPE_URI, '')
+                label = unified_resource_format_ckan(label_eu.lower())
+                if not label:
+                    label = label_eu
         return imt, label
 
-
     def parse_dataset(self, dataset_dict, dataset_ref):
-        return dataset_dict
-        # TODO
+        # Temporal
+        start, end = self._time_interval_edp(dataset_ref, DCT.temporal)
+        if start:
+            dataset_dict['extras'].append(
+                {'key': 'temporal_start', 'value': start})
+        if end:
+            dataset_dict['extras'].append(
+                {'key': 'temporal_end', 'value': end})
 
+        # Spatial
+        geom, centr = self._spatial_edp(dataset_ref, DCT.spatial)
+        if geom:
+            dataset_dict['extras'].append(
+                {'key': 'spatial', 'value': geom})
+        if centr:
+            dataset_dict['extras'].append(
+                {'key': 'spatial_centroid', 'value': centr})
+
+        # Resources
+        for resource_dict in dataset_dict.get('resources', []):
+            resource_uri = resource_dict['uri']
+            if not resource_uri:
+                continue
+            distribution = URIRef(resource_uri)
+
+            # Format
+            normalize_ckan_format = toolkit.asbool(config.get(
+                'ckanext.dcat.normalize_ckan_format', True))
+            imt, label = self._distribution_format_edp(
+                distribution, normalize_ckan_format)
+
+            if imt:
+                resource_dict['mimetype'] = imt
+
+            if label:
+                resource_dict['format'] = label
+            elif imt:
+                resource_dict['format'] = imt
+
+            # License
+            license, license_type = self._distribution_license_edp(
+                distribution, DCT.license)
+
+            if not license:
+                try:
+                    resource_dict.pop('license')
+                except:
+                    pass
+            else:
+                resource_dict['license'] = license
+            if license_type:
+                self._add_or_replace_from_extra(
+                    resource_dict, 'license_type', license_type)
+
+            # Availability
+            availability = self._object_value(
+                distribution, DCATAP.availability)
+            if availability:
+                resource_dict['availability'] = availability
+
+        return dataset_dict
 
     def graph_from_dataset(self, dataset_dict, dataset_ref):
 
@@ -187,9 +256,7 @@ class EDPDCATAPProfile(RDFProfile):
         landing_page = dataset_dict.get('url')
         if landing_page:
             landing_page_ref = URIRefOrLiteral(landing_page)
-            g.remove((dataset_ref, DCAT.landingPage, landing_page_ref))
             g.add((landing_page_ref, RDF.type, FOAF.Document))
-            g.add((dataset_ref, DCAT.landingPage, landing_page_ref))
 
         # Publisher: Generalize type from FOAF.Organization to FOAF.Agent
         # TODO is not correct to generalize but edp validator does
@@ -220,28 +287,41 @@ class EDPDCATAPProfile(RDFProfile):
                 self._add_date_triple(temporal_ref, DCAT.endDate, end)
 
         # Spatial
-        spatial = g.value(dataset_ref, DCT.spatial)
-        if spatial:
+        spatial_ref = g.value(dataset_ref, DCT.spatial)
+        if spatial_ref:
             spatial_geom = self._get_dataset_value(dataset_dict, 'spatial')
             spatial_uri = self._get_dataset_value(dataset_dict, 'spatial_uri')
-            g.remove((spatial, LOCN.geometry, None))
+            # spatial_centroid recommended property for dcat-ap v2
+            spatial_centroid = self._get_dataset_value(
+                dataset_dict, 'spatial_centroid')
+            g.remove((spatial_ref, LOCN.geometry, None))
             if spatial_uri and GEO_SCHEMA_URI in spatial_uri:
                 schema = URIRef(GEO_SCHEMA_URI)
                 # TODO Just to pass the validator but it is a mistake to put it.
-                g.add((spatial, SKOS.inScheme, schema))
+                g.add((spatial_ref, SKOS.inScheme, schema))
             if spatial_geom:
                 # WKT, because GeoDCAT-AP says so
                 try:
-                    g.add((spatial,
+                    g.add((spatial_ref,
                            DCAT.bbox,
                            Literal(wkt.dumps(json.loads(spatial_geom),
                                              decimals=4),
                                    datatype=GSP.wktLiteral)))
                 except:
                     # GeoJSON
-                    g.add((spatial,
+                    g.add((spatial_ref,
                            LOCN.geometry,
                            Literal(spatial_geom, datatype=GEOJSON_IMT)))
+                    pass
+
+            if spatial_centroid:
+                try:
+                    g.add((spatial_ref,
+                           DCAT.centroid,
+                           Literal(wkt.dumps(json.loads(spatial_centroid),
+                                             decimals=4),
+                                   datatype=GSP.wktLiteral)))
+                except:
                     pass
 
         # Resource
@@ -249,9 +329,8 @@ class EDPDCATAPProfile(RDFProfile):
             distribution = self._distribution_id_from_distributions(
                 g, resource_dict)
 
-
             # Format
-            # DCAT.mediaType (the first to accomplish): 
+            # DCAT.mediaType (the first to accomplish):
             # 1. It maps mimetype to IANA mimetype.
             # 2. It maps format to IANA mimetype.
             # 3. It does not modify the euro_dcat_ap profile.
@@ -259,44 +338,46 @@ class EDPDCATAPProfile(RDFProfile):
             # 1. It maps format to EUROPE file type as dct:MediaTypeOrExtent.
             # 2. It maps mimetype to EUROPE file type as dct:MediaTypeOrExtent.
             # 3. It does not modify the euro_dcat_ap profile.
-            
+
             mimetype = resource_dict.get('mimetype')
             fmt = resource_dict.get('format')
             normalize_ckan_format = toolkit.asbool(config.get(
                 'ckanext.dcat.normalize_ckan_format', True))
 
             if ((mimetype or fmt) and normalize_ckan_format and
-                toolkit.check_ckan_version(min_version='2.3')):
+                    toolkit.check_ckan_version(min_version='2.3')):
 
                 # DCAT.mediaType
                 if mimetype:
                     mimetype_iana = unified_resource_format_iana(mimetype)
                 elif fmt:
                     mimetype_iana = unified_resource_format_iana(fmt)
-                
+
                 if mimetype_iana:
                     mimetype_ref = URIRef(
                         '{0}{1}'.format(IANA_FILETYPE_URI, mimetype_iana))
                     g.remove((distribution, DCAT.mediaType, None))
                     g.add((mimetype_ref, RDF.type, DCT.MediaType))
                     g.add((distribution, DCAT.mediaType, mimetype_ref))
-                
+
                 # DCT.format
                 if fmt:
                     fmt_eu = unified_resource_format_eu(fmt)
                 elif mimetype:
                     fmt_eu = unified_resource_format_eu(mimetype)
-                
+
                 if fmt_eu:
                     fmt_ref = URIRef(
                         '{0}{1}'.format(EU_FILETYPE_URI, fmt_eu))
                     g.remove((distribution, DCT['format'], None))
                     g.add((fmt_ref, RDF.type, DCT['MediaTypeOrExtent']))
                     g.add((distribution, DCT['format'],
-                        fmt_ref))
-
+                           fmt_ref))
 
             # License
+            # DCT.LicenseDocument as RDF.type
+            # Add DCT.type as license type
+            # If license is a Literal, serialize as BNode and DCT.title,
             license = self._get_resource_value(resource_dict, 'license')
             license_type = self._get_resource_value(
                 resource_dict, 'license_type')
@@ -305,7 +386,12 @@ class EDPDCATAPProfile(RDFProfile):
                 if not license:
                     license_ref = BNode()
                 else:
-                    license_ref = URIRefOrLiteral(license)
+                    license = URIRefOrLiteral(license)
+                    if isinstance(license, Literal):
+                        license_ref = BNode()
+                        g.add((license_ref, DCT.title, license))
+                    else:
+                        license_ref = license
                 if license_type:
                     g.add((license_ref, DCT.type, URIRefOrLiteral(license_type)))
                 g.add((license_ref, RDF.type, DCT.LicenseDocument))
@@ -314,10 +400,10 @@ class EDPDCATAPProfile(RDFProfile):
             # Availability
             availability = resource_dict.get('availability')
             if availability:
-                availability_ref = URIRefOrLiteral(availability)
-                g.add((distribution, DCATAP.availability, availability_ref))
+                g.add((distribution, DCATAP.availability,
+                       URIRefOrLiteral(availability)))
 
-    def test_graph_from_catalog(self, catalog_dict, catalog_ref):
-        
+    def graph_from_catalog(self, catalog_dict, catalog_ref):
+
         g = self.g
         # TODO

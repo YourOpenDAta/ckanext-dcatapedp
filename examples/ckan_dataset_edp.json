@@ -116,6 +116,10 @@
       "value": "http://sws.geonames.org/3114965"
     },
     {
+      "key": "spatial_centroid",
+      "value": "{\"type\": \"Point\", \"coordinates\": [50.0, 40.0]}"
+    },
+    {
       "key": "temporal_end",
       "value": "2021-06-25T15:01:07.173973"
     },
