@@ -1,6 +1,8 @@
-.. You should enable this project on travis-ci.org and coveralls.io to make
+<!--
+
+. You should enable this project on travis-ci.org and coveralls.io to make
    these badges work. The necessary Travis and Coverage config files have been
-   generated for you.
+   generated for you.  
 
 .. image:: https://travis-ci.org/YourOpenDAta/ckanext-dcatapedp.svg?branch=master
     :target: https://travis-ci.org/YourOpenDAta/ckanext-dcatapedp
@@ -27,65 +29,65 @@
 .. image:: https://pypip.in/license/ckanext-dcatapedp/badge.svg
     :target: https://pypi.python.org/pypi/ckanext-dcatapedp/
     :alt: License
+-->
 
-=============
-ckanext-dcatapedp
-=============
+# ckanext-dcatapedp <!-- omit in toc -->
+`TODO: Include badges`
 
-.. Put a description of your extension here:
-   What does it do? What features does it have?
-   Consider including some screenshots or embedding a video!
+CKAN extension for the European Data Portal
 
+- [Requirements](#requirements)
+- [Installation](#installation)
+- [Development Installation](#development-installation)
+- [Running the Tests](#running-the-tests)
+- [License](#license)
 
-------------
-Requirements
-------------
+## Requirements
 
-For example, you might want to mention here which versions of CKAN this
-extension works with.
-
-
-------------
-Installation
-------------
-
-.. Add any additional install steps to the list below.
-   For example installing any non-Python dependencies or adding any required
-   config settings.
-
-To install ckanext-dcatapedp:
-
-1. Activate your CKAN virtual environment, for example::
-
-     . /usr/lib/ckan/default/bin/activate
-
-2. Install the ckanext-dcatapedp Python package into your virtual environment::
-
-     pip install ckanext-dcatapedp
-
-3. Add ``dcatapedp`` to the ``ckan.plugins`` setting in your CKAN
-   config file (by default the config file is located at
-   ``/etc/ckan/default/production.ini``).
-
-4. Restart CKAN. For example if you've deployed CKAN with Apache on Ubuntu::
-
-     sudo service apache2 reload
+- The extension was developed for CKAN 2.8 `TODO: test in other versions`
+- It is based on the [ckanext-dcat extension](https://github.com/ckan/ckanext-dcat "ckanext-dcat extension")
 
 
----------------
-Config Settings
----------------
+
+
+## Installation
+
+1. Install the [ckanext-dcat extension](https://github.com/ckan/ckanext-dcat/blob/master/README.md)
+
+2. Activate your CKAN virtual environment, for example::
+
+        . /usr/lib/ckan/default/bin/activate
+
+3. Download the extension in the CKAN path extensions (e.g. `/usr/lib/ckan/venv/src `):
+
+        git clone https://github.com/YourOpenDAta/ckanext-dcatapedp.git
+
+4. Install the ckanext-dcatapedp Python package into your virtual environment::
+
+        pip install ckanext-dcatapedp
+
+5. Active the edp_dcat_ap profile in the `production.ini` file:
+
+        ckanext.dcat.rdf.profiles = euro_dcat_ap edp_dcat_ap
+
+6. Restart CKAN. For example if you've deployed CKAN with Apache on Ubuntu::
+
+         sudo service apache2 reload
+
+
+<!--## Config Settings
 
 Document any optional config settings here. For example::
 
     # The minimum number of hours to wait before re-checking a resource
     # (optional, default: 24).
     ckanext.dcatapedp.some_setting = some_default_value
+-->
 
 
-------------------------
-Development Installation
-------------------------
+
+## Development Installation
+
 
 To install ckanext-dcatapedp for development, activate your CKAN virtualenv and
 do::
@@ -96,23 +98,17 @@ do::
     pip install -r dev-requirements.txt
 
 
------------------
-Running the Tests
------------------
+## Running the Tests
 
 To run the tests, do::
 
-    nosetests --nologcapture --with-pylons=test.ini
-
-To run the tests and produce a coverage report, first make sure you have
-coverage installed in your virtualenv (``pip install coverage``) then run::
-
-    nosetests --nologcapture --with-pylons=test.ini --with-coverage --cover-package=ckanext.dcatapedp --cover-inclusive --cover-erase --cover-tests
+    pytest --ckan-ini=test.ini ckanext/dcatapedp/tests/
 
 
----------------------------------
-Registering ckanext-dcatapedp on PyPI
----------------------------------
+<!--
+
+## Registering ckanext-dcatapedp on PyPI
+
 
 ckanext-dcatapedp should be availabe on PyPI as
 https://pypi.python.org/pypi/ckanext-dcatapedp. If that link doesn't work, then
@@ -138,10 +134,10 @@ steps:
        git tag 0.0.1
        git push --tags
 
+-->
 
-----------------------------------------
-Releasing a New Version of ckanext-dcatapedp
-----------------------------------------
+<!--
+## Releasing a New Version of ckanext-dcatapedp
 
 ckanext-dcatapedp is availabe on PyPI as https://pypi.python.org/pypi/ckanext-dcatapedp.
 To publish a new version to PyPI follow these steps:
@@ -164,3 +160,11 @@ To publish a new version to PyPI follow these steps:
 
        git tag 0.0.2
        git push --tags
+
+-->
+
+## License
+
+ckandext-dcatapedp is open and licensed under the GNU Affero General Public License (AGPL) v3.0 whose full text may be found at:
+
+[http://www.fsf.org/licensing/licenses/agpl-3.0.html](http://www.fsf.org/licensing/licenses/agpl-3.0.html)
