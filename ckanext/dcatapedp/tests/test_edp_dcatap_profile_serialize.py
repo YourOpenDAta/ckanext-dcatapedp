@@ -8,16 +8,14 @@ from geomet import wkt
 
 from rdflib import URIRef, BNode, Literal
 
-from ckantoolkit.tests import helpers, factories
-
 from ckan.plugins import toolkit
 
 from ckanext.dcat import utils
 from ckanext.dcat.processors import RDFSerializer
 from ckanext.dcatapedp.profiles import (
-    DCT, DCAT, DCATAP, ADMS, VCARD, FOAF, SCHEMA, TIME, LOCN, GSP,
+    DCT, DCAT, DCATAP, VCARD, FOAF, SCHEMA, LOCN, GSP,
     SKOS, EU_CORPORATE_BODY_SCHEMA_URI, GEO_SCHEMA_URI, GEOJSON_IMT)
-from rdflib.namespace import Namespace, RDF, XSD, RDFS
+from rdflib.namespace import RDF, XSD
 
 
 class BaseSerializeTest(object):

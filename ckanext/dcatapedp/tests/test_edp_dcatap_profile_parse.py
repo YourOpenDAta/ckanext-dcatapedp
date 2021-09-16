@@ -12,9 +12,9 @@ from ckan.plugins import toolkit
 
 from ckanext.dcat.processors import RDFParser
 from ckanext.dcatapedp.profiles import (
-    DCT, DCAT, DCATAP, ADMS, VCARD, FOAF, SCHEMA, TIME, LOCN, GSP,
+    DCT, DCAT, DCATAP, VCARD, FOAF, LOCN, GSP,
     OWL, SKOS, EU_CORPORATE_BODY_SCHEMA_URI)
-from rdflib.namespace import Namespace, RDF, XSD
+from rdflib.namespace import RDF, XSD
 
 
 class BaseParseTest(object):
