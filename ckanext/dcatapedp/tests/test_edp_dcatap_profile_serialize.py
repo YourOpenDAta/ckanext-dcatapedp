@@ -14,8 +14,8 @@ from ckanext.dcat import utils
 from ckanext.dcat.processors import RDFSerializer
 from ckanext.dcatapedp.profiles import (
     DCT, DCAT, DCATAP, VCARD, FOAF, SCHEMA, LOCN, GSP,
-    SKOS, EU_CORPORATE_BODY_SCHEMA_URI, GEO_SCHEMA_URI, GEOJSON_IMT)
-from rdflib.namespace import RDF, XSD
+    SKOS, EU_CORPORATE_BODY_SCHEMA_URI, GEO_SCHEMA_URI, GEOJSON_IMT, ADMS)
+from rdflib.namespace import RDF, XSD, RDFS
 
 
 class BaseSerializeTest(object):
@@ -298,6 +298,185 @@ class TestEDPDCATAPProfileSerializeDataset(BaseSerializeTest):
 
         assert not self._triple(g, spatial, DCAT.centroid, None)
 
+    def test_access_rights(self):
+        
+        dataset = self._get_base_dataset()
+        dataset['extras'].extend([
+            {
+                'key': 'access_rights',
+                'value': 'public'
+            }
+        ])
+        extras = self._extras(dataset)
+
+        s = RDFSerializer(profiles=['euro_dcat_ap', 'edp_dcat_ap'])
+        g = s.g
+        dataset_ref = s.graph_from_dataset(dataset)
+
+
+        access_rights = self._triple(g, dataset_ref, DCT.accessRights, None)[2]
+
+        assert isinstance(access_rights, BNode)
+        right_label = self._triple(g, access_rights, RDFS.label, None)[2]
+        assert self._triple(g, access_rights, RDF.type, DCT.RightsStatement)
+        assert str(right_label) == extras['access_rights']
+
+    def test_conforms_to(self):
+        dataset = self._get_base_dataset()
+        dataset['extras'].extend([
+            {
+                'key': 'conforms_to',
+                'value': '[\"Standard 1\", \"Standard 2\"]'
+            }
+        ])
+
+        extras = self._extras(dataset)
+        conforms_to_list = json.loads(extras['conforms_to'])
+
+        s = RDFSerializer(profiles=['euro_dcat_ap', 'edp_dcat_ap'])
+        g = s.g
+        dataset_ref = s.graph_from_dataset(dataset)
+
+        assert len([t for t in g.triples((dataset_ref, DCT.conformsTo, None))]) == len(conforms_to_list)
+        for _, _, conforms_to_ref in  g.triples((dataset_ref, DCT.conformsTo, None)):
+            assert isinstance(conforms_to_ref, BNode)
+            assert self._triple(g, conforms_to_ref, RDF.type, DCT.Standard)
+            conforms_to = self._triple(g, conforms_to_ref, RDFS.label, None)[2]
+            assert str(conforms_to) in conforms_to_list 
+
+    def test_page(self):
+        dataset = self._get_base_dataset()
+        dataset['extras'].extend([
+            {
+            "key": "documentation",
+            "value": "[\"http://page1\", \"http://page2\"]"
+            }
+        ])
+
+        extras = self._extras(dataset)
+        documentation_to_list = json.loads(extras['documentation'])
+
+        s = RDFSerializer(profiles=['euro_dcat_ap', 'edp_dcat_ap'])
+        g = s.g
+        dataset_ref = s.graph_from_dataset(dataset)
+
+        assert len([t for t in g.triples((dataset_ref, FOAF.page, None))]) == len(documentation_to_list)
+        for _, _, page_ref in  g.triples((dataset_ref, FOAF.page, None)):
+            assert page_ref
+            assert self._triple(g, page_ref, RDF.type, FOAF.Document)
+
+    def test_adms_identifier(self):
+        dataset = self._get_base_dataset()
+        dataset['extras'].extend([
+            {
+                'key': 'alternate_identifier',
+                'value': '[\"alternate_identifier_0\", \"alternate_identifier_1\"]'
+            }
+        ])
+
+        extras = self._extras(dataset)
+        adms_identifier_list = json.loads(extras['alternate_identifier'])
+
+        s = RDFSerializer(profiles=['euro_dcat_ap', 'edp_dcat_ap'])
+        g = s.g
+        dataset_ref = s.graph_from_dataset(dataset)
+
+        assert len([t for t in g.triples((dataset_ref, ADMS.identifier, None))]) == len(adms_identifier_list)
+        for _, _, adms_identifier_ref in  g.triples((dataset_ref, ADMS.identifier, None)):
+            assert isinstance(adms_identifier_ref, BNode)
+            assert self._triple(g, adms_identifier_ref, RDF.type, ADMS.Identifier)
+            adms_identifier = self._triple(g, adms_identifier_ref, SKOS.notation, None)[2]
+            assert str(adms_identifier) in adms_identifier_list
+
+    def test_provenance(self):      
+        dataset = self._get_base_dataset()
+        dataset['extras'].extend([
+            {
+                'key': 'provenance',
+                'value': 'provenance info'
+            }
+        ])
+        extras = self._extras(dataset)
+
+        s = RDFSerializer(profiles=['euro_dcat_ap', 'edp_dcat_ap'])
+        g = s.g
+        dataset_ref = s.graph_from_dataset(dataset)
+
+
+        provenance = self._triple(g, dataset_ref, DCT.provenance, None)[2]
+
+        assert isinstance(provenance, BNode)
+        provenance_label = self._triple(g, provenance, RDFS.label, None)[2]
+        assert self._triple(g, provenance, RDF.type, DCT.ProvenanceStatement)
+        assert str(provenance_label) == extras['provenance']
+
+    def test_sample(self):
+        dataset = self._get_base_dataset()
+        dataset['extras'].extend([
+            {
+                "key": "sample",
+                "value": "[\"http://Distribution0\", \"http://Distribution1\"]"
+            }
+
+        ])
+
+        extras = self._extras(dataset)
+        sample_list = json.loads(extras['sample'])
+
+        s = RDFSerializer(profiles=['euro_dcat_ap', 'edp_dcat_ap'])
+        g = s.g
+        dataset_ref = s.graph_from_dataset(dataset)
+
+        assert len([t for t in g.triples((dataset_ref, ADMS.sample, None))]) == len(sample_list)
+        for _, _, sample in  g.triples((dataset_ref, ADMS.sample, None)):
+            assert isinstance(sample, URIRef)
+            assert str(sample) in sample_list
+
+    def test_source(self):
+        dataset = self._get_base_dataset()
+        dataset['extras'].extend([
+            {
+                "key": "source",
+                "value": "[\"http://Dataset0\", \"http://Dataset1\"]"
+            }
+
+        ])
+
+        extras = self._extras(dataset)
+        source_list = json.loads(extras['source'])
+
+        s = RDFSerializer(profiles=['euro_dcat_ap', 'edp_dcat_ap'])
+        g = s.g
+        dataset_ref = s.graph_from_dataset(dataset)
+
+        assert len([t for t in g.triples((dataset_ref, DCT.source, None))]) == len(source_list)
+        for _, _, source in  g.triples((dataset_ref, DCT.source, None)):
+            assert isinstance(source, URIRef)
+            assert str(source) in source_list 
+
+    def test_dct_type(self):        
+        dataset = self._get_base_dataset()
+        dataset['extras'].extend([
+            {
+                'key': 'dcat_type',
+                'value': 'dataset'
+            }
+        ])
+        extras = self._extras(dataset)
+
+        s = RDFSerializer(profiles=['euro_dcat_ap', 'edp_dcat_ap'])
+        g = s.g
+        dataset_ref = s.graph_from_dataset(dataset)
+
+
+        dct_type = self._triple(g, dataset_ref, DCT['type'], None)[2]
+
+        assert isinstance(dct_type, BNode)
+        dct_type_label = self._triple(g, dct_type, SKOS.prefLabel, None)[2]
+        assert self._triple(g, dct_type, RDF.type, SKOS.Concept)
+        assert str(dct_type_label) == extras['dcat_type']
+
+    # Resources
     def test_graph_from_resource(self):
 
         dataset = self._get_base_dataset()
@@ -468,12 +647,8 @@ class TestEDPDCATAPProfileSerializeDataset(BaseSerializeTest):
 
         dataset, resource = self._get_base_dataset_and_resource()
         resource['license'] = 'http://publications.europa.eu/resource/authority/licence/CC_BY_4_0'
-        resource['extras'].append({
-            "key": "license_type",
-            "value": "http://purl.org/adms/licencetype/PublicDomain"
-        })
+        resource['license_type'] = "http://purl.org/adms/licencetype/PublicDomain"
 
-        extras = self._extras(resource)
 
         s = RDFSerializer(profiles=['euro_dcat_ap', 'edp_dcat_ap'])
         g = s.g
@@ -482,7 +657,7 @@ class TestEDPDCATAPProfileSerializeDataset(BaseSerializeTest):
         assert str(distribution) == utils.resource_uri(resource)
 
         license = URIRef(resource['license'])
-        license_type = URIRef(extras['license_type'])
+        license_type = URIRef(resource['license_type'])
         assert self._triple(g, distribution, DCT.license, license)
         assert self._triple(g, license, RDF.type, DCT.LicenseDocument)
         assert self._triple(g, license, DCT.type, URIRef(license_type))
@@ -491,12 +666,8 @@ class TestEDPDCATAPProfileSerializeDataset(BaseSerializeTest):
 
         dataset, resource = self._get_base_dataset_and_resource()
         resource['license'] = 'CC_BY_4_0'
-        resource['extras'].append({
-            "key": "license_type",
-            "value": "PublicDomain"
-        })
+        resource['license_type'] = 'PublicDomain'
 
-        extras = self._extras(resource)
 
         s = RDFSerializer(profiles=['euro_dcat_ap', 'edp_dcat_ap'])
         g = s.g
@@ -510,14 +681,12 @@ class TestEDPDCATAPProfileSerializeDataset(BaseSerializeTest):
         assert self._triple(g, license, DCT.title,
                             Literal(resource['license']))
         assert self._triple(g, license, DCT.type,
-                            Literal(extras['license_type']))
+                            Literal(resource['license_type']))
 
     def test_distribution_license_only(self):
 
         dataset, resource = self._get_base_dataset_and_resource()
         resource['license'] = 'http://publications.europa.eu/resource/authority/licence/CC_BY_4_0'
-
-        extras = self._extras(resource)
 
         s = RDFSerializer(profiles=['euro_dcat_ap', 'edp_dcat_ap'])
         g = s.g
@@ -533,12 +702,8 @@ class TestEDPDCATAPProfileSerializeDataset(BaseSerializeTest):
     def test_distribution_license_type_only(self):
 
         dataset, resource = self._get_base_dataset_and_resource()
-        resource['extras'].append({
-            "key": "license_type",
-            "value": "http://purl.org/adms/licencetype/PublicDomain"
-        })
+        resource['license_type'] = 'http://purl.org/adms/licencetype/PublicDomain'
 
-        extras = self._extras(resource)
 
         s = RDFSerializer(profiles=['euro_dcat_ap', 'edp_dcat_ap'])
         g = s.g
@@ -547,7 +712,7 @@ class TestEDPDCATAPProfileSerializeDataset(BaseSerializeTest):
         assert str(distribution) == utils.resource_uri(resource)
 
         license = self._triple(g, distribution, DCT.license, None)[2]
-        license_type = URIRef(extras['license_type'])
+        license_type = URIRef(resource['license_type'])
         assert isinstance(license, BNode)
         assert self._triple(g, license, RDF.type, DCT.LicenseDocument)
         assert self._triple(g, license, DCT.type, URIRef(license_type))
@@ -579,6 +744,62 @@ class TestEDPDCATAPProfileSerializeDataset(BaseSerializeTest):
 
         assert self._triple(
             g, distribution, DCATAP.availability, resource['availability'])
+
+    def test_distribution_conforms_to(self):
+        dataset, resource = self._get_base_dataset_and_resource()
+        resource['conforms_to'] = '[\"Standard 1\", \"Standard 2\"]'
+
+        conforms_to_list = json.loads(resource['conforms_to'])
+
+
+        s = RDFSerializer(profiles=['euro_dcat_ap', 'edp_dcat_ap'])
+        g = s.g
+        dataset_ref = s.graph_from_dataset(dataset)
+        distribution = self._triple(g, dataset_ref, DCAT.distribution, None)[2]
+        assert str(distribution) == utils.resource_uri(resource)
+
+        assert len([t for t in g.triples((distribution, DCT.conformsTo, None))]) == len(conforms_to_list)
+        for _, _, conforms_to_ref in  g.triples((distribution, DCT.conformsTo, None)):
+            assert isinstance(conforms_to_ref, BNode)
+            assert self._triple(g, conforms_to_ref, RDF.type, DCT.Standard)
+            conforms_to = self._triple(g, conforms_to_ref, RDFS.label, None)[2]
+            assert str(conforms_to) in conforms_to_list
+
+    def test_distribution_rights(self):
+        
+        dataset, resource = self._get_base_dataset_and_resource()
+        resource['rights'] = 'Some statement about resource rights'
+
+        s = RDFSerializer(profiles=['euro_dcat_ap', 'edp_dcat_ap'])
+        g = s.g
+        dataset_ref = s.graph_from_dataset(dataset)
+        distribution = self._triple(g, dataset_ref, DCAT.distribution, None)[2]
+        assert str(distribution) == utils.resource_uri(resource)
+
+
+        rights = self._triple(g, distribution, DCT.rights, None)[2]
+
+        assert isinstance(rights, BNode)
+        right_label = self._triple(g, rights, RDFS.label, None)[2]
+        assert self._triple(g, rights, RDF.type, DCT.RightsStatement)
+        assert str(right_label) == resource['rights']
+
+    def test_distribution_page(self):
+        dataset, resource = self._get_base_dataset_and_resource()
+        resource['documentation'] = '[\"http://pageDistribution1\", \"http://pageDistribution2\"]'       
+
+        documentation_to_list = json.loads(resource['documentation'])
+
+        s = RDFSerializer(profiles=['euro_dcat_ap', 'edp_dcat_ap'])
+        g = s.g
+        dataset_ref = s.graph_from_dataset(dataset)
+        distribution = self._triple(g, dataset_ref, DCAT.distribution, None)[2]
+        assert str(distribution) == utils.resource_uri(resource)
+
+        assert len([t for t in g.triples((distribution, FOAF.page, None))]) == len(documentation_to_list)
+        for _, _, page_ref in  g.triples((distribution, FOAF.page, None)):
+            assert page_ref
+            assert self._triple(g, page_ref, RDF.type, FOAF.Document) 
 
 
 class TestEDPDCATAPProfileSerializeCatalog(BaseSerializeTest):

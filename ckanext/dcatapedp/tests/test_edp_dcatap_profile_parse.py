@@ -13,8 +13,8 @@ from ckan.plugins import toolkit
 from ckanext.dcat.processors import RDFParser
 from ckanext.dcatapedp.profiles import (
     DCT, DCAT, DCATAP, VCARD, FOAF, LOCN, GSP,
-    OWL, SKOS, EU_CORPORATE_BODY_SCHEMA_URI)
-from rdflib.namespace import RDF, XSD
+    OWL, SKOS, EU_CORPORATE_BODY_SCHEMA_URI, ADMS)
+from rdflib.namespace import RDF, XSD, RDFS
 
 
 class BaseParseTest(object):
@@ -240,6 +240,101 @@ class TestEDPDCATAPProfileSerializeDataset(BaseParseTest):
         assert extras['spatial'] == spatial_geom
         assert extras['spatial_centroid'] == spatial_centroid
 
+    # accessRights: tested in euro_dcat_ap profile
+
+    def test_conforms_to(self):
+        conforms_to = '[\"Standard 1\", \"Standard 2\"]'
+        conforms_to_list = json.loads(conforms_to)
+        conforms_to_ref_0 = BNode()
+        conforms_to_ref_1 = BNode()
+
+        g, dataset_ref = self._get_base_graph()
+
+        g.add((dataset_ref, DCT.conformsTo, conforms_to_ref_0))
+        g.add((conforms_to_ref_0, RDF.type, DCT.Standard))
+        g.add((conforms_to_ref_0, RDFS.label,
+               Literal(conforms_to_list[0])))
+
+        g.add((dataset_ref, DCT.conformsTo, conforms_to_ref_1))
+        g.add((conforms_to_ref_1, RDF.type, DCT.Standard))
+        g.add((conforms_to_ref_1, RDFS.label,
+               Literal(conforms_to_list[1])))
+        
+        p = RDFParser(profiles=['euro_dcat_ap', 'edp_dcat_ap'])
+        p.g = g
+        dataset = [d for d in p.datasets()][0]
+        extras = self._extras(dataset)
+
+        assert sorted(json.loads(extras['conforms_to'])) == conforms_to_list
+
+    # page, documentation: tested in euro_dcat_ap profile
+
+    def test_adms_identifier(self):
+        adms_identifier = '[\"alternate_identifier_0\", \"alternate_identifier_1\"]'
+        adms_identifier_list = json.loads(adms_identifier)
+        adms_identifier_ref_0 = BNode()
+        adms_identifier_ref_1 = BNode()
+
+        g, dataset_ref = self._get_base_graph()
+
+        g.add((dataset_ref, ADMS.identifier, adms_identifier_ref_0))
+        g.add((adms_identifier_ref_0, RDF.type, ADMS.Identifier))
+        g.add((adms_identifier_ref_0, SKOS.notation,
+               Literal(adms_identifier_list[0])))
+
+        g.add((dataset_ref, ADMS.identifier, adms_identifier_ref_1))
+        g.add((adms_identifier_ref_1, RDF.type, ADMS.Identifier))
+        g.add((adms_identifier_ref_1, SKOS.notation,
+               Literal(adms_identifier_list[1])))
+        
+        p = RDFParser(profiles=['euro_dcat_ap', 'edp_dcat_ap'])
+        p.g = g
+        dataset = [d for d in p.datasets()][0]
+        extras = self._extras(dataset)
+
+        assert sorted(json.loads(extras['alternate_identifier'])) == adms_identifier_list
+
+    def test_provenance(self):
+        provenance_ref = BNode()
+        provenance = 'provenance info'
+
+        g, dataset_ref = self._get_base_graph()
+
+        g.add((dataset_ref, DCT.provenance, provenance_ref))
+        g.add((provenance_ref, RDF.type, DCT.ProvenanceStatement))
+        g.add((provenance_ref, RDFS.label, Literal(provenance)))
+
+        p = RDFParser(profiles=['euro_dcat_ap', 'edp_dcat_ap'])
+        p.g = g
+
+        dataset = [d for d in p.datasets()][0]
+        extras = self._extras(dataset)
+
+        assert extras['provenance'] == str(provenance)
+
+    # sample: tested in euro_dcat_ap profile
+    # source: tested in euro_dcat_ap profile
+
+    def test_dct_type(self):
+        dct_type_ref = BNode()
+        dct_type = 'dataset'
+
+        g, dataset_ref = self._get_base_graph()
+
+        g.add((dataset_ref, DCT['type'], dct_type_ref))
+        g.add((dct_type_ref, RDF.type, SKOS.Concept))
+        g.add((dct_type_ref, SKOS.prefLabel, Literal(dct_type)))
+
+        p = RDFParser(profiles=['euro_dcat_ap', 'edp_dcat_ap'])
+        p.g = g
+
+        dataset = [d for d in p.datasets()][0]
+        extras = self._extras(dataset)
+
+        assert extras['dcat_type'] == str(dct_type)        
+
+
+    # Resources
     def test_graph_from_resource(self):
         g, dataset_ref, distribution_ref = self._get_base_graph_with_resource()
         p = RDFParser(profiles=['euro_dcat_ap', 'edp_dcat_ap'])
@@ -285,7 +380,6 @@ class TestEDPDCATAPProfileSerializeDataset(BaseParseTest):
             p = RDFParser(profiles=['euro_dcat_ap', 'edp_dcat_ap'])
             p.g = g
 
-            dataset_base, resource_base = self._get_base_dataset_and_resource()
             dataset = [d for d in p.datasets()][0]
             resource = dataset.get('resources')[0]
 
@@ -306,7 +400,6 @@ class TestEDPDCATAPProfileSerializeDataset(BaseParseTest):
             p = RDFParser(profiles=['euro_dcat_ap', 'edp_dcat_ap'])
             p.g = g
 
-            dataset_base, resource_base = self._get_base_dataset_and_resource()
             dataset = [d for d in p.datasets()][0]
             resource = dataset.get('resources')[0]
 
@@ -328,7 +421,6 @@ class TestEDPDCATAPProfileSerializeDataset(BaseParseTest):
             p = RDFParser(profiles=['euro_dcat_ap', 'edp_dcat_ap'])
             p.g = g
 
-            dataset_base, resource_base = self._get_base_dataset_and_resource()
             dataset = [d for d in p.datasets()][0]
             resource = dataset.get('resources')[0]
 
@@ -356,7 +448,6 @@ class TestEDPDCATAPProfileSerializeDataset(BaseParseTest):
             p = RDFParser(profiles=['euro_dcat_ap', 'edp_dcat_ap'])
             p.g = g
 
-            dataset_base, resource_base = self._get_base_dataset_and_resource()
             dataset = [d for d in p.datasets()][0]
             resource = dataset.get('resources')[0]
 
@@ -378,13 +469,11 @@ class TestEDPDCATAPProfileSerializeDataset(BaseParseTest):
         p = RDFParser(profiles=['euro_dcat_ap', 'edp_dcat_ap'])
         p.g = g
 
-        dataset_base, resource_base = self._get_base_dataset_and_resource()
         dataset = [d for d in p.datasets()][0]
         resource = dataset.get('resources')[0]
-        resource_extras = self._extras(resource)
 
         assert resource['license'] == str(license_ref)
-        assert resource_extras['license_type'] == str(license_type)
+        assert resource['license_type'] == str(license_type)
 
     def test_distribution_license_literal(self):
 
@@ -405,10 +494,9 @@ class TestEDPDCATAPProfileSerializeDataset(BaseParseTest):
 
         dataset = [d for d in p.datasets()][0]
         resource = dataset.get('resources')[0]
-        resource_extras = self._extras(resource)
 
         assert resource['license'] == license_name
-        assert resource_extras['license_type'] == license_type
+        assert resource['license_type'] == license_type
 
     def test_distribution_license_only(self):
 
@@ -425,13 +513,9 @@ class TestEDPDCATAPProfileSerializeDataset(BaseParseTest):
 
         dataset = [d for d in p.datasets()][0]
         resource = dataset.get('resources')[0]
-        try:
-            resource_extras = self._extras(resource)
-        except:
-            resource_extras = []
 
         assert resource['license'] == str(license_ref)
-        assert not 'license_type' in resource_extras
+        assert not 'license_type' in resource
 
     def test_distribution_license_type_only(self):
 
@@ -447,13 +531,11 @@ class TestEDPDCATAPProfileSerializeDataset(BaseParseTest):
         p = RDFParser(profiles=['euro_dcat_ap', 'edp_dcat_ap'])
         p.g = g
 
-        dataset_base, resource_base = self._get_base_dataset_and_resource()
         dataset = [d for d in p.datasets()][0]
         resource = dataset.get('resources')[0]
-        resource_extras = self._extras(resource)
 
         assert not 'license' in resource
-        assert resource_extras['license_type'] == str(license_type)
+        assert resource['license_type'] == str(license_type)
 
     def test_distribution_availability(self):
 
@@ -467,7 +549,6 @@ class TestEDPDCATAPProfileSerializeDataset(BaseParseTest):
         p = RDFParser(profiles=['euro_dcat_ap', 'edp_dcat_ap'])
         p.g = g
 
-        dataset_base, resource_base = self._get_base_dataset_and_resource()
         dataset = [d for d in p.datasets()][0]
         resource = dataset.get('resources')[0]
 
@@ -485,12 +566,38 @@ class TestEDPDCATAPProfileSerializeDataset(BaseParseTest):
         p = RDFParser(profiles=['euro_dcat_ap', 'edp_dcat_ap'])
         p.g = g
 
-        dataset_base, resource_base = self._get_base_dataset_and_resource()
         dataset = [d for d in p.datasets()][0]
         resource = dataset.get('resources')[0]
 
         assert resource['availability'] == availability
 
+    def test_distribution_conforms_to(self):
+        conforms_to = '[\"Standard distribution 1\", \"Standard distribution 2\"]'
+        conforms_to_list = json.loads(conforms_to)
+        conforms_to_ref_0 = BNode()
+        conforms_to_ref_1 = BNode()
+
+        g, dataset_ref, distribution_ref = self._get_base_graph_with_resource()
+
+        g.add((distribution_ref, DCT.conformsTo, conforms_to_ref_0))
+        g.add((conforms_to_ref_0, RDF.type, DCT.Standard))
+        g.add((conforms_to_ref_0, RDFS.label,
+               Literal(conforms_to_list[0])))
+
+        g.add((distribution_ref, DCT.conformsTo, conforms_to_ref_1))
+        g.add((conforms_to_ref_1, RDF.type, DCT.Standard))
+        g.add((conforms_to_ref_1, RDFS.label,
+               Literal(conforms_to_list[1])))
+        
+        p = RDFParser(profiles=['euro_dcat_ap', 'edp_dcat_ap'])
+        p.g = g
+        dataset = [d for d in p.datasets()][0]
+        resource = dataset.get('resources')[0]
+
+        assert sorted(json.loads(resource['conforms_to'])) == conforms_to_list
+    
+    # rights: tested in euro_dcat_ap profile
+    # page, documentation: tested in euro_dcat_ap profile
 
 # class TestEDPDCATAPProfileSerializeCatalog(BaseSerializeTest):
 #     pass

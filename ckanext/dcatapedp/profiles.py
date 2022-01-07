@@ -68,7 +68,7 @@ class EDPDCATAPProfile(RDFProfile):
     def _distribution_id_from_distributions(self, g, resource_dict):
         '''
 
-        Finds the complete subject 
+        Finds the complete subject
         1. The value of the uri field
         2.(catalog + dataset + distribution) of a distribution
         from dataset id and resource id
@@ -87,6 +87,8 @@ class EDPDCATAPProfile(RDFProfile):
             if not uri or uri == 'None':
                 uri = resource_uri(resource_dict)
         return uri
+
+    # CKAN metadata from GRAPH
 
     def _add_or_replace_from_extra(self, dictionary, key, value):
         if not 'extras' in dictionary:
@@ -191,6 +193,16 @@ class EDPDCATAPProfile(RDFProfile):
                     label = label_eu
         return imt, label
 
+    def _conforms_to_edp(self, subject):
+        conformsToList = []
+        for _, _, conforms_to_ref in self.g.triples((subject, DCT.conformsTo, None)):
+                    conformsToList.append(self._object_value(conforms_to_ref, RDFS.label))
+        if len(conformsToList) > 0:
+            return json.dumps(conformsToList)
+        else:
+            return None
+
+
     def parse_dataset(self, dataset_dict, dataset_ref):
         # Temporal
         start, end = self._time_interval_edp(dataset_ref, DCT.temporal)
@@ -209,6 +221,43 @@ class EDPDCATAPProfile(RDFProfile):
         if centr:
             dataset_dict['extras'].append(
                 {'key': 'spatial_centroid', 'value': centr})
+
+        # accessRights: in euro_dcat_ap profile
+
+        # conformsTo
+        conformsToList = self._conforms_to_edp(dataset_ref)
+        if conformsToList:
+            self._add_or_replace_from_extra(
+                    dataset_dict, 'conforms_to', conformsToList)
+
+        # page, documentation: in euro_dcat_ap profile
+
+        # adms identifier
+        adms_identifier_list = []
+        for _, _, adms_identifier_ref in self.g.triples((dataset_ref, ADMS.identifier, None)):
+                    adms_identifier_list.append(self._object_value(adms_identifier_ref, SKOS.notation))
+        if len(adms_identifier_list) > 0:
+            self._add_or_replace_from_extra(
+                    dataset_dict, 'alternate_identifier', json.dumps(adms_identifier_list))
+
+        # provenance
+        provenance_ref = self.g.value(dataset_ref, DCT.provenance)
+        if (provenance_ref and isinstance(provenance_ref, BNode)):
+            provenance = self.g.value(provenance_ref, RDFS.label)
+            if provenance:
+              self._add_or_replace_from_extra(
+                    dataset_dict, 'provenance', str(provenance))
+
+        # sample: in euro_dcat_ap profile
+        # source: in euro_dcat_ap profile
+
+        # dct type
+        dct_type_ref = self.g.value(dataset_ref, DCT['type'])
+        if (dct_type_ref and isinstance(dct_type_ref, BNode)):
+            dct_type = self.g.value(dct_type_ref, SKOS.prefLabel)
+            if dct_type:
+              self._add_or_replace_from_extra(
+                    dataset_dict, 'dcat_type', str(dct_type))
 
         # Resources
         for resource_dict in dataset_dict.get('resources', []):
@@ -243,8 +292,7 @@ class EDPDCATAPProfile(RDFProfile):
             else:
                 resource_dict['license'] = license
             if license_type:
-                self._add_or_replace_from_extra(
-                    resource_dict, 'license_type', license_type)
+                resource_dict['license_type'] = license_type
 
             # Availability
             availability = self._object_value(
@@ -252,7 +300,42 @@ class EDPDCATAPProfile(RDFProfile):
             if availability:
                 resource_dict['availability'] = availability
 
+            # conformsTo
+            conformsToList = self._conforms_to_edp(distribution)
+            if conformsToList:
+                resource_dict['conforms_to'] = conformsToList
+
+            # rights: in euro_dcat_ap profile
+            # page, documentation: in euro_dcat_ap profile
+
         return dataset_dict
+
+    # GRAPH from CKAN metadata
+
+    def _generate_conforms_to_graph(self, subject):
+        g = self.g
+        for _, _, conforms_to in g.triples((subject, DCT.conformsTo, None)):
+            conforms_to_ref = BNode()
+            g.remove((subject, DCT.conformsTo, conforms_to))
+            g.add((conforms_to_ref, RDF.type, DCT.Standard))
+            g.add((conforms_to_ref, RDFS.label, Literal(conforms_to)))
+            g.add((subject, DCT.conformsTo, conforms_to_ref))
+
+    def _generate_page_to_graph(self, subject):
+        g = self.g
+        for _, _, page in g.triples((subject, FOAF.page, None)):
+            page_ref = URIRefOrLiteral(page)
+            g.add((page_ref, RDF.type, FOAF.Document))
+
+    def _generate_rights_to_graph(self, subject, predicate):
+        g = self.g
+        access_rights = g.value(subject, predicate)
+        if access_rights:
+            license_rights_ref = BNode()
+            g.remove((subject, predicate, None))
+            g.add((license_rights_ref, RDF.type, DCT.RightsStatement))
+            g.add((license_rights_ref, RDFS.label, Literal(access_rights)))
+            g.add((subject, predicate, license_rights_ref))
 
     def graph_from_dataset(self, dataset_dict, dataset_ref):
 
@@ -268,7 +351,6 @@ class EDPDCATAPProfile(RDFProfile):
             g.add((landing_page_ref, RDF.type, FOAF.Document))
 
         # Publisher: Generalize type from FOAF.Organization to FOAF.Agent
-        # TODO is not correct to generalize but edp validator does
         organization_ref = g.value(dataset_ref, DCT.publisher)
         if organization_ref:
             g.set((organization_ref, RDF.type, FOAF.Agent))
@@ -278,7 +360,6 @@ class EDPDCATAPProfile(RDFProfile):
                 g.add((organization_ref, SKOS.inScheme, schema))
 
         # Contact details: Generalize type from VCARD.Organization to VCARD.contactPoint
-        # TODO is not correct to generalize but edp validator does
         contact_point_ref = g.value(dataset_ref, DCAT.contactPoint)
         if contact_point_ref:
             g.set((contact_point_ref, RDF.type, VCARD.Kind))
@@ -332,6 +413,51 @@ class EDPDCATAPProfile(RDFProfile):
                                    datatype=GSP.wktLiteral)))
                 except:
                     pass
+
+        # accessRights: change range to dct:RightsStatement
+        self._generate_rights_to_graph(dataset_ref, DCT.accessRights)
+
+        #conformsTo: change range to dct:Standard
+        self._generate_conforms_to_graph(dataset_ref)
+
+        # page change range to foaf:document
+        self._generate_page_to_graph(dataset_ref)
+
+        # adms identifier: change range to ADMS.Identifier
+        for _, _, adms_identifier in g.triples((dataset_ref, ADMS.identifier, None)):
+            adms_identifier_ref = BNode()
+            g.remove((dataset_ref, ADMS.identifier, adms_identifier))
+            g.add((adms_identifier_ref, RDF.type, ADMS.Identifier))
+            g.add((adms_identifier_ref, SKOS.notation, Literal(adms_identifier)))
+            g.add((dataset_ref, ADMS.identifier, adms_identifier_ref))
+
+        # provenance: change range to dct:ProvenanceStatement
+        provenance = g.value(dataset_ref, DCT.provenance)
+        if provenance:
+            provenance_ref = BNode()
+            g.remove((dataset_ref, DCT.provenance, None))
+            g.add((provenance_ref, RDF.type, DCT.ProvenanceStatement))
+            g.add((provenance_ref, RDFS.label, Literal(provenance)))
+            g.add((dataset_ref, DCT.provenance, provenance_ref))
+        
+        # sample: change range to UriRef or Literal not only literal
+        for _, _, sample in g.triples((dataset_ref, ADMS.sample, None)):
+            g.remove((dataset_ref, ADMS.sample, sample))
+            g.add((dataset_ref, ADMS.sample, URIRefOrLiteral(sample)))
+
+        # source: change range to UriRef or Literal not only literal
+        for _, _, source in g.triples((dataset_ref, DCT.source, None)):
+            g.remove((dataset_ref, DCT.source, source))
+            g.add((dataset_ref, DCT.source, URIRefOrLiteral(source)))
+
+        # type: change range to skos:concept
+        dct_type = g.value(dataset_ref, DCT['type'])
+        if dct_type:
+            dct_type_ref = BNode()
+            g.remove((dataset_ref, DCT['type'], None))
+            g.add((dct_type_ref, RDF.type, SKOS.Concept))
+            g.add((dct_type_ref, SKOS.prefLabel, Literal(dct_type)))
+            g.add((dataset_ref, DCT['type'], dct_type_ref))
 
         # Resource
         for resource_dict in dataset_dict.get('resources', []):
@@ -411,6 +537,15 @@ class EDPDCATAPProfile(RDFProfile):
             if availability:
                 g.add((distribution, DCATAP.availability,
                        URIRefOrLiteral(availability)))
+
+            # conformsTo: change range to dct:Standard
+            self._generate_conforms_to_graph(distribution)
+
+            # rights: change range to dct:RightsStatement
+            self._generate_rights_to_graph(distribution, DCT.rights)
+
+            # page change range to foaf:document
+            self._generate_page_to_graph(distribution)
 
     def graph_from_catalog(self, catalog_dict, catalog_ref):
 

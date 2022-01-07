@@ -6,6 +6,7 @@
   "maintainer_email": "",
   "num_tags": 2,
   "id": "cf3dcff7-34ae-4fab-a202-2f17e3153b2f",
+  "uri": "http://example_dataset",
   "metadata_created": "2021-07-08T11:31:11.500592",
   "metadata_modified": "2021-07-08T12:08:15.177991",
   "author": "",
@@ -13,41 +14,6 @@
   "state": "active",
   "version": "2.0",
   "creator_user_id": "e7d900d6-f2f5-4e9e-abbc-ac96cddcb78e",
-  "type": "dataset",
-  "resources": [
-    {
-      "cache_last_updated": null,
-      "package_id": "cf3dcff7-34ae-4fab-a202-2f17e3153b2f",
-      "datastore_active": false,
-      "availability": "http://dcat-ap.de/def/plannedAvailability/stable",
-      "size": 200000000,
-      "download_url": "http://localhost/downloadURL",
-      "id": "9871734c-d261-4d66-96de-cfce6ddf8a31",
-      "state": "active",
-      "hash": "",
-      "description": "Example description of Example Resource",
-      "format": "JSON",
-      "mimetype_inner": null,
-      "url_type": null,
-      "revision_id": "22fcd3f6-17a0-49e5-a715-de493e9b3719",
-      "mimetype": "application/json",
-      "cache_url": null,
-      "name": "Example Resource",
-      "license": "http://publications.europa.eu/resource/authority/licence/CC_BY_4_0",
-      "created": "2021-07-08T11:37:12.760031",
-      "url": "",
-      "last_modified": null,
-      "position": 0,
-      "access_url": "http://localhost/accessURL",
-      "resource_type": null,
-      "extras": [
-        {
-          "key": "license_type",
-          "value": "http://purl.org/adms/licencetype/PublicDomain"
-        }
-      ]
-    }
-  ],
   "num_resources": 1,
   "tags": [
     {
@@ -86,6 +52,9 @@
   "url": "http://localhost/landingpageExample.es",
   "notes": "Description example of dataset test",
   "owner_org": "fbdbf159-fe3d-4448-b586-421665dff216",
+  "license_url": "http://www.opendefinition.org/licenses/cc-by",
+  "title": "examplepackage",
+  "revision_id": "4785b854-df04-4a61-b9a5-609fa6f15458",
   "extras": [
     {
       "key": "contact_email",
@@ -130,9 +99,104 @@
     {
       "key": "theme",
       "value": "[\"http://publications.europa.eu/resource/authority/data-theme/ECON\", \"http://publications.europa.eu/resource/authority/data-theme/EDUC\"]"
+    },
+    {
+      "key": "access_rights",
+      "value": "public"
+    },
+    {
+      "key": "conforms_to", 
+      "value": "[\"Standard 1\", \"Standard 2\"]"
+    },
+    {
+      "key": "documentation",
+      "value": "[\"http://page1\", \"http://page2\"]"
+    },
+    {
+      "key": "frequency",
+      "value": "http://purl.org/cld/freq/daily"
+    },
+    {
+      "key": "is_version_of",
+      "value": "[\"http://dataset1\", \"http://dataset2\"]"
+    },
+    {
+      "key": "has_version",
+      "value": "[\"http://dataset1\", \"http://dataset2\"]"
+    },
+    {
+      "key": "language",
+      "value": "[\"http://publications.europa.eu/resource/authority/language/SPA\", \"http://publications.europa.eu/resource/authority/language/GAL\"]"
+    },
+    {
+      "key": "alternate_identifier",
+      "value": "[\"alternate_identifier_1\", \"alternate_identifier_2\"]"
+    },
+    {
+      "key": "provenance",
+      "value": "provenance info"
+    },
+    {
+      "key": "issued",
+      "value": "2022-01-02T11:31:11.500592"
+    },
+    {
+      "key": "modified",
+      "value": "2022-01-03T11:31:11.500592"
+    },
+    {
+      "key": "version_notes",
+      "value": "2.0.1"
+    },
+    {
+      "key": "sample",
+      "value": "[\"http://Distribution1\", \"http://Distribution2\"]"
+    },
+    {
+      "key": "source",
+      "value": "[\"http://Dataset1\", \"http://Dataset2\"]"
+    },
+    {
+      "key": "dcat_type",
+      "value": "dataset"
     }
+
   ],
-  "license_url": "http://www.opendefinition.org/licenses/cc-by",
-  "title": "examplepackage",
-  "revision_id": "4785b854-df04-4a61-b9a5-609fa6f15458"
+  "resources": [
+    {
+      "uri": "http://example_distribution",
+      "cache_last_updated": null,
+      "package_id": "cf3dcff7-34ae-4fab-a202-2f17e3153b2f",
+      "datastore_active": false,
+      "availability": "http://dcat-ap.de/def/plannedAvailability/stable",
+      "size": 200000000,
+      "download_url": "http://localhost/downloadURL",
+      "id": "9871734c-d261-4d66-96de-cfce6ddf8a31",
+      "state": "active",
+      "hash": "",
+      "description": "Example description of Example Resource",
+      "format": "JSON",
+      "mimetype_inner": null,
+      "url_type": null,
+      "revision_id": "22fcd3f6-17a0-49e5-a715-de493e9b3719",
+      "mimetype": "application/json",
+      "cache_url": null,
+      "name": "Example Resource",
+      "license": "http://publications.europa.eu/resource/authority/licence/CC_BY_4_0",
+      "license_type": "http://purl.org/adms/licencetype/PublicDomain",
+      "created": "2021-07-08T11:37:12.760031",
+      "url": "",
+      "last_modified": null,
+      "position": 0,
+      "access_url": "http://localhost/accessURL",
+      "resource_type": null,
+      "status": "http://purl.org/adms/status/Completed",
+      "conforms_to": "[\"Standard distribution 1\", \"Standard distribution 2\"]",
+      "issued": "2022-01-06T15:01:07.173973",
+      "modified": "2022-01-05T15:01:07.173973",
+      "language": "[\"http://publications.europa.eu/resource/authority/language/ENG\", \"http://publications.europa.eu/resource/authority/language/FRA\"]",
+      "rights": "Some statement about resource rights",
+      "documentation": "[\"http://pageDistribution1\", \"http://pageDistribution2\"]"
+    }
+  ]
 }
