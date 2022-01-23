@@ -80,7 +80,7 @@ setup(
     # pip to create the appropriate form of executable for the target platform.
     entry_points='''
         [ckan.plugins]
-
+        oaipmh_edp=ckanext.dcatapedp.plugin:OAIPMHPlugin
         [ckan.rdf.profiles]
         edp_dcat_ap=ckanext.dcatapedp.profiles:EDPDCATAPProfile
 

@@ -1,13 +1,38 @@
-# import ckan.plugins as plugins
-# import ckan.plugins.toolkit as toolkit
+import logging
+import os
+from ckan.plugins import implements, SingletonPlugin
+from ckan.plugins import IRoutes, IConfigurer
+
+log = logging.getLogger(__name__)
 
 
-# class DcatapedpPlugin(plugins.SingletonPlugin):
-#     plugins.implements(plugins.IConfigurer)
+class OAIPMHPlugin(SingletonPlugin):
+    '''OAI-PMH plugin, maps the controller and uses the template configuration
+    stanza to have the template render in case there is no parameters to the
+    interface.
+    '''
+    implements(IRoutes, inherit=True)
+    implements(IConfigurer)
 
-#     # IConfigurer
+    def update_config(self, config):
+        """This IConfigurer implementation causes CKAN to look in the
+        ```public``` and ```templates``` directories present in this
+        package for any customisations.
 
-#     def update_config(self, config_):
-#         toolkit.add_template_directory(config_, 'templates')
-#         toolkit.add_public_directory(config_, 'public')
-#         toolkit.add_resource('fanstatic', 'dcatapedp')
+        It also shows how to set the site title here (rather than in
+        the main site .ini file), and causes CKAN to use the
+        customised package form defined in ``package_form.py`` in this
+        directory.
+        """
+        here = os.path.dirname(__file__)
+        rootdir = os.path.dirname(os.path.dirname(here))
+        template_dir = os.path.join(rootdir, 'ckanext',
+                                    'dcatapedp', 'templates')
+        config['extra_template_paths'] = ','.join([template_dir, config.get('extra_template_paths', '')])
+
+    def before_map(self, map):
+        '''Map the controller to be used for OAI-PMH.
+        '''
+        controller = 'ckanext.dcatapedp.oaipmh_edp.controller:OAIPMHController'
+        map.connect('/oai', controller=controller, action='index')
+        return map

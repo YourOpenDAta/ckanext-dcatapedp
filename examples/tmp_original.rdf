@@ -1,0 +1,94 @@
+<?xml version="1.0" encoding="utf-8"?>
+<rdf:RDF
+  xmlns:foaf="http://xmlns.com/foaf/0.1/"
+  xmlns:owl="http://www.w3.org/2002/07/owl#"
+  xmlns:locn="http://www.w3.org/ns/locn#"
+  xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+  xmlns:dcat="http://www.w3.org/ns/dcat#"
+  xmlns:dct="http://purl.org/dc/terms/"
+  xmlns:schema="http://schema.org/"
+  xmlns:vcard="http://www.w3.org/2006/vcard/ns#"
+  xmlns:adms="http://www.w3.org/ns/adms#"
+>
+  <dcat:Dataset rdf:about="http://example_dataset">
+    <dcat:theme rdf:resource="http://publications.europa.eu/resource/authority/data-theme/ECON"/>
+    <foaf:page rdf:resource="http://page1"/>
+    <dct:language rdf:resource="http://publications.europa.eu/resource/authority/language/SPA"/>
+    <dct:language rdf:resource="http://publications.europa.eu/resource/authority/language/GAL"/>
+    <adms:identifier>alternate_identifier_1</adms:identifier>
+    <dct:modified rdf:datatype="http://www.w3.org/2001/XMLSchema#dateTime">2022-01-03T11:31:11.500592</dct:modified>
+    <dct:conformsTo>Standard 2</dct:conformsTo>
+    <dcat:keyword>newTag2</dcat:keyword>
+    <dct:accessRights>public</dct:accessRights>
+    <dct:isVersionOf rdf:resource="http://dataset2"/>
+    <dct:accrualPeriodicity rdf:resource="http://purl.org/cld/freq/daily"/>
+    <dcat:keyword>newTag</dcat:keyword>
+    <adms:versionNotes>2.0.1</adms:versionNotes>
+    <dct:hasVersion rdf:resource="http://dataset1"/>
+    <dct:description>Description example of dataset test</dct:description>
+    <dcat:contactPoint>
+      <vcard:Organization rdf:about="http://localhost/ContactUri">
+        <vcard:hasEmail rdf:resource="mailto:maintainer@email.com"/>
+        <vcard:fn>MaintainerName ExampleSurname</vcard:fn>
+      </vcard:Organization>
+    </dcat:contactPoint>
+    <adms:sample>http://Distribution2</adms:sample>
+    <dct:temporal>
+      <dct:PeriodOfTime rdf:nodeID="N40149b8122e44c08928aec8149533245">
+        <schema:startDate rdf:datatype="http://www.w3.org/2001/XMLSchema#dateTime">2021-05-25T15:01:07.173973</schema:startDate>
+        <schema:endDate rdf:datatype="http://www.w3.org/2001/XMLSchema#dateTime">2021-06-25T15:01:07.173973</schema:endDate>
+      </dct:PeriodOfTime>
+    </dct:temporal>
+    <owl:versionInfo>2.0</owl:versionInfo>
+    <dct:title>examplepackage</dct:title>
+    <dct:conformsTo>Standard 1</dct:conformsTo>
+    <dct:issued rdf:datatype="http://www.w3.org/2001/XMLSchema#dateTime">2022-01-02T11:31:11.500592</dct:issued>
+    <foaf:page rdf:resource="http://page2"/>
+    <dct:provenance>provenance info</dct:provenance>
+    <dct:identifier>cf3dcff7-34ae-4fab-a202-2f17e3153b2f</dct:identifier>
+    <adms:identifier>alternate_identifier_2</adms:identifier>
+    <dcat:landingPage rdf:resource="http://localhost/landingpageExample.es"/>
+    <dct:hasVersion rdf:resource="http://dataset2"/>
+    <dcat:distribution>
+      <dcat:Distribution rdf:about="http://example_distribution">
+        <foaf:page rdf:resource="http://pageDistribution1"/>
+        <dct:issued rdf:datatype="http://www.w3.org/2001/XMLSchema#dateTime">2022-01-06T15:01:07.173973</dct:issued>
+        <dct:conformsTo>Standard distribution 1</dct:conformsTo>
+        <dct:rights>Some statement about resource rights</dct:rights>
+        <dct:title>Example Resource</dct:title>
+        <dcat:downloadURL rdf:resource="http://localhost/downloadURL"/>
+        <dct:language rdf:resource="http://publications.europa.eu/resource/authority/language/FRA"/>
+        <adms:status rdf:resource="http://purl.org/adms/status/Completed"/>
+        <dct:format>JSON</dct:format>
+        <dct:description>Example description of Example Resource</dct:description>
+        <dct:license rdf:resource="http://publications.europa.eu/resource/authority/licence/CC_BY_4_0"/>
+        <dcat:accessURL rdf:resource="http://localhost/accessURL"/>
+        <dcat:mediaType>application/json</dcat:mediaType>
+        <dcat:byteSize rdf:datatype="http://www.w3.org/2001/XMLSchema#decimal">200000000.0</dcat:byteSize>
+        <dct:modified rdf:datatype="http://www.w3.org/2001/XMLSchema#dateTime">2022-01-05T15:01:07.173973</dct:modified>
+        <dct:conformsTo>Standard distribution 2</dct:conformsTo>
+        <foaf:page rdf:resource="http://pageDistribution2"/>
+        <dct:language rdf:resource="http://publications.europa.eu/resource/authority/language/ENG"/>
+      </dcat:Distribution>
+    </dcat:distribution>
+    <dcat:theme rdf:resource="http://publications.europa.eu/resource/authority/data-theme/EDUC"/>
+    <dct:publisher>
+      <foaf:Organization rdf:about="http://publications.europa.eu/resource/authority/corporate-body/SPC">
+        <foaf:name>None</foaf:name>
+        <dct:type rdf:resource="http://purl.org/adms/publishertype/Academia-ScientificOrganisation"/>
+      </foaf:Organization>
+    </dct:publisher>
+    <dct:isVersionOf rdf:resource="http://dataset1"/>
+    <dct:type>dataset</dct:type>
+    <dct:spatial>
+      <dct:Location rdf:about="http://sws.geonames.org/3114965">
+        <locn:geometry rdf:datatype="https://www.iana.org/assignments/media-types/application/vnd.geo+json">{"type": "Polygon", "coordinates": [[[175.0, 17.5], [-65.5, 17.5], [-65.5, 72.0], [175.0, 72.0], [175.0, 17.5]]]}</locn:geometry>
+        <locn:geometry rdf:datatype="http://www.opengis.net/ont/geosparql#wktLiteral">POLYGON ((175.0000 17.5000, -65.5000 17.5000, -65.5000 72.0000, 175.0000 72.0000, 175.0000 17.5000))</locn:geometry>
+      </dct:Location>
+    </dct:spatial>
+    <adms:sample>http://Distribution1</adms:sample>
+    <dct:source>http://Dataset2</dct:source>
+    <dct:source>http://Dataset1</dct:source>
+  </dcat:Dataset>
+</rdf:RDF>
+
