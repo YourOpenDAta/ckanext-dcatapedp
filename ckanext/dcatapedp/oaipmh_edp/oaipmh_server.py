@@ -4,18 +4,17 @@
 import json
 import logging
 
-from oaipmh import common
-from oaipmh.common import ResumptionOAIPMH
-from oaipmh.error import IdDoesNotExistError
-from pylons import config
-from sqlalchemy import between
-
 from ckan.lib.helpers import url_for
 from ckan.logic import get_action
-from ckan.model import Package, Session, Group, PackageRevision
+from ckan.model import Group, Package, Session
+from ckan.plugins.toolkit import config
 from ckanext.dcat.processors import RDFSerializer
 # from ckanext.kata import helpers
 from ckanext.dcatapedp.utils import get_earliest_datestamp
+from oaipmh import common
+from oaipmh.common import ResumptionOAIPMH
+from oaipmh.error import IdDoesNotExistError
+from sqlalchemy import between
 
 log = logging.getLogger(__name__)
 
@@ -30,7 +29,7 @@ class CKANServer(ResumptionOAIPMH):
         '''
         return common.Identify(
             repositoryName=config.get('ckan.site_title', 'repository'),
-            baseURL=config.get('ckan.site_url', None) + url_for(controller='ckanext.dcatapedp.oaipmh_edp.controller:OAIPMHController', action='index'),
+            baseURL=config.get('ckan.site_url', None) + url_for('oaipmh_edp.oai_action'),
             protocolVersion="2.0",
             adminEmails=['etsin@csc.fi'],
             earliestDatestamp= get_earliest_datestamp(),
@@ -121,15 +120,16 @@ class CKANServer(ResumptionOAIPMH):
         if not set:
             packages = Session.query(Package).filter(Package.type=='dataset'). \
                 filter(Package.state == 'active').filter(Package.private!=True)
-            if from_ and not until:
-                packages = packages.filter(PackageRevision.revision_timestamp > from_).\
-                    filter(Package.name==PackageRevision.name)
-            if until and not from_:
-                packages = packages.filter(PackageRevision.revision_timestamp < until).\
-                    filter(Package.name==PackageRevision.name)
-            if from_ and until:
-                packages = packages.filter(between(PackageRevision.revision_timestamp, from_, until)).\
-                    filter(Package.name==PackageRevision.name)
+            # TODO implement from_ and until
+            # if from_ and not until:
+            #     packages = packages.filter(PackageRevision.revision_timestamp > from_).\
+            #         filter(Package.name==PackageRevision.name)
+            # if until and not from_:
+            #     packages = packages.filter(PackageRevision.revision_timestamp < until).\
+            #         filter(Package.name==PackageRevision.name)
+            # if from_ and until:
+            #     packages = packages.filter(between(PackageRevision.revision_timestamp, from_, until)).\
+            #         filter(Package.name==PackageRevision.name)
             packages = packages.all()
         else:
             group = Group.get(set)
@@ -137,15 +137,16 @@ class CKANServer(ResumptionOAIPMH):
                 # Note that group.packages never returns private datasets regardless of 'with_private' parameter.
                 packages = group.packages(return_query=True, with_private=False).filter(Package.type=='dataset'). \
                     filter(Package.state == 'active')
-                if from_ and not until:
-                    packages = packages.filter(PackageRevision.revision_timestamp > from_).\
-                        filter(Package.name==PackageRevision.name)
-                if until and not from_:
-                    packages = packages.filter(PackageRevision.revision_timestamp < until).\
-                        filter(Package.name==PackageRevision.name)
-                if from_ and until:
-                    packages = packages.filter(between(PackageRevision.revision_timestamp, from_, until)).\
-                        filter(Package.name==PackageRevision.name)
+                # TODO implement from_ and until
+                # if from_ and not until:
+                #     packages = packages.filter(PackageRevision.revision_timestamp > from_).\
+                #         filter(Package.name==PackageRevision.name)
+                # if until and not from_:
+                #     packages = packages.filter(PackageRevision.revision_timestamp < until).\
+                #         filter(Package.name==PackageRevision.name)
+                # if from_ and until:
+                #     packages = packages.filter(between(PackageRevision.revision_timestamp, from_, until)).\
+                #         filter(Package.name==PackageRevision.name)
                 packages = packages.all()
         if cursor is not None:
             cursor_end = cursor + batch_size if cursor + batch_size < len(packages) else len(packages)

@@ -45,6 +45,7 @@ CKAN extension for the European Data Portal
   - [Dataset - Package](#dataset---package)
   - [Distribution - Resource](#distribution---resource)
   - [Agent](#agent)
+- [OAI-PMH version 2](#oai-pmh-version-2)
 - [Examples](#examples)
   - [Dataset (Package) and Distribution (Resource) CKAN metadata](#dataset-package-and-distribution-resource-ckan-metadata)
   - [Dataset (Package) and Distribution (Resource) DCAT-AP v2.0.1 rdf](#dataset-package-and-distribution-resource-dcat-ap-v201-rdf)
@@ -76,9 +77,10 @@ CKAN extension for the European Data Portal
 
         pip install -e ckanext-dcatapedp
 
-5. Active the edp_dcat_ap profile in the `production.ini` file:
+5. Active the edp_dcat_ap profile and add the oaipmh_edp plugin  in the `production.ini` file:
 
         ckanext.dcat.rdf.profiles = euro_dcat_ap edp_dcat_ap
+        ckan.plugins = (other plugins) oaipmh_edp
 
 6. Restart CKAN. For example if you've deployed CKAN with Apache on Ubuntu::
 
@@ -252,6 +254,23 @@ To publish a new version to PyPI follow these steps:
 | ------------ | ------------ | ------------ | ------------ | ------------ | ------------ |
 |   |   |   |   |   |   |
 |   |   |   |   |   |   |
+
+## OAI-PMH version 2 
+
+1. Create example of data
+   
+      git ckan -c /etc/ckan/production.ini seed basic
+
+  
+2. Examples of petitions
+  - https://{ckan-instance-host}/oai?verb=Identify
+  - https://{ckan-instance-host}/oai?verb=ListMetadataFormats
+  - https://{ckan-instance-host}/oai?verb=ListSets
+  - https://{ckan-instance-host}/oai?verb=ListRecords&metadataPrefix=dcat
+  - https://{ckan-instance-host}/oai?verb=ListIdentifiers&metadataPrefix=dcat&set=example_org
+  - https://{ckan-instance-host}/oai?verb=GetRecord&identifier=ce3f7074-15b7-44ab-a2b9-85e26dc17f67&metadataPrefix=dcat
+
+
 
 ## Examples
 
