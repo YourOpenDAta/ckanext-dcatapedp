@@ -12,10 +12,9 @@ from ckan.plugins import toolkit
 
 from ckanext.dcat import utils
 from ckanext.dcat.processors import RDFSerializer
-from ckanext.dcatapedp.profiles import (
-    DCT, DCAT, DCATAP, VCARD, FOAF, SCHEMA, LOCN, GSP,
-    SKOS, EU_CORPORATE_BODY_SCHEMA_URI, GEO_SCHEMA_URI, GEOJSON_IMT, ADMS)
-from rdflib.namespace import RDF, XSD, RDFS
+
+from ckanext.dcatapedp.profiles.namespaces import *
+from ckanext.dcatapedp.profiles.controlled_vocabularies import *
 
 
 class BaseSerializeTest(object):
@@ -68,7 +67,7 @@ class TestEDPDCATAPProfileSerializeDataset(BaseSerializeTest):
 
         dataset = self._get_base_dataset()
 
-        s = RDFSerializer(profiles=['euro_dcat_ap', 'edp_dcat_ap'])
+        s = RDFSerializer(profiles=['euro_dcat_ap', 'dcat_ap_2.0.1'])
         g = s.g
         dataset_ref = s.graph_from_dataset(dataset)
 
@@ -79,7 +78,7 @@ class TestEDPDCATAPProfileSerializeDataset(BaseSerializeTest):
         dataset = self._get_base_dataset()
         dataset['url'] = 'http://example.com/landingpageExample.es'
 
-        s = RDFSerializer(profiles=['euro_dcat_ap', 'edp_dcat_ap'])
+        s = RDFSerializer(profiles=['euro_dcat_ap', 'dcat_ap_2.0.1'])
         g = s.g
         dataset_ref = s.graph_from_dataset(dataset)
 
@@ -100,7 +99,7 @@ class TestEDPDCATAPProfileSerializeDataset(BaseSerializeTest):
 
         extras = self._extras(dataset)
 
-        s = RDFSerializer(profiles=['euro_dcat_ap', 'edp_dcat_ap'])
+        s = RDFSerializer(profiles=['euro_dcat_ap', 'dcat_ap_2.0.1'])
         g = s.g
         dataset_ref = s.graph_from_dataset(dataset)
 
@@ -124,7 +123,7 @@ class TestEDPDCATAPProfileSerializeDataset(BaseSerializeTest):
 
         extras = self._extras(dataset)
 
-        s = RDFSerializer(profiles=['euro_dcat_ap', 'edp_dcat_ap'])
+        s = RDFSerializer(profiles=['euro_dcat_ap', 'dcat_ap_2.0.1'])
         g = s.g
         dataset_ref = s.graph_from_dataset(dataset)
 
@@ -157,7 +156,7 @@ class TestEDPDCATAPProfileSerializeDataset(BaseSerializeTest):
 
         extras = self._extras(dataset)
 
-        s = RDFSerializer(profiles=['euro_dcat_ap', 'edp_dcat_ap'])
+        s = RDFSerializer(profiles=['euro_dcat_ap', 'dcat_ap_2.0.1'])
         g = s.g
         dataset_ref = s.graph_from_dataset(dataset)
 
@@ -185,7 +184,7 @@ class TestEDPDCATAPProfileSerializeDataset(BaseSerializeTest):
 
         extras = self._extras(dataset)
 
-        s = RDFSerializer(profiles=['euro_dcat_ap', 'edp_dcat_ap'])
+        s = RDFSerializer(profiles=['euro_dcat_ap', 'dcat_ap_2.0.1'])
         g = s.g
         dataset_ref = s.graph_from_dataset(dataset)
 
@@ -220,7 +219,7 @@ class TestEDPDCATAPProfileSerializeDataset(BaseSerializeTest):
 
         extras = self._extras(dataset)
 
-        s = RDFSerializer(profiles=['euro_dcat_ap', 'edp_dcat_ap'])
+        s = RDFSerializer(profiles=['euro_dcat_ap', 'dcat_ap_2.0.1'])
         g = s.g
         dataset_ref = s.graph_from_dataset(dataset)
 
@@ -255,7 +254,7 @@ class TestEDPDCATAPProfileSerializeDataset(BaseSerializeTest):
         )
         extras = self._extras(dataset)
 
-        s = RDFSerializer(profiles=['euro_dcat_ap', 'edp_dcat_ap'])
+        s = RDFSerializer(profiles=['euro_dcat_ap', 'dcat_ap_2.0.1'])
         g = s.g
         dataset_ref = s.graph_from_dataset(dataset)
 
@@ -283,7 +282,7 @@ class TestEDPDCATAPProfileSerializeDataset(BaseSerializeTest):
         ])
         extras = self._extras(dataset)
 
-        s = RDFSerializer(profiles=['euro_dcat_ap', 'edp_dcat_ap'])
+        s = RDFSerializer(profiles=['euro_dcat_ap', 'dcat_ap_2.0.1'])
         g = s.g
         dataset_ref = s.graph_from_dataset(dataset)
 
@@ -309,7 +308,7 @@ class TestEDPDCATAPProfileSerializeDataset(BaseSerializeTest):
         ])
         extras = self._extras(dataset)
 
-        s = RDFSerializer(profiles=['euro_dcat_ap', 'edp_dcat_ap'])
+        s = RDFSerializer(profiles=['euro_dcat_ap', 'dcat_ap_2.0.1'])
         g = s.g
         dataset_ref = s.graph_from_dataset(dataset)
 
@@ -333,7 +332,7 @@ class TestEDPDCATAPProfileSerializeDataset(BaseSerializeTest):
         extras = self._extras(dataset)
         conforms_to_list = json.loads(extras['conforms_to'])
 
-        s = RDFSerializer(profiles=['euro_dcat_ap', 'edp_dcat_ap'])
+        s = RDFSerializer(profiles=['euro_dcat_ap', 'dcat_ap_2.0.1'])
         g = s.g
         dataset_ref = s.graph_from_dataset(dataset)
 
@@ -356,7 +355,7 @@ class TestEDPDCATAPProfileSerializeDataset(BaseSerializeTest):
         extras = self._extras(dataset)
         documentation_to_list = json.loads(extras['documentation'])
 
-        s = RDFSerializer(profiles=['euro_dcat_ap', 'edp_dcat_ap'])
+        s = RDFSerializer(profiles=['euro_dcat_ap', 'dcat_ap_2.0.1'])
         g = s.g
         dataset_ref = s.graph_from_dataset(dataset)
 
@@ -377,7 +376,7 @@ class TestEDPDCATAPProfileSerializeDataset(BaseSerializeTest):
         extras = self._extras(dataset)
         adms_identifier_list = json.loads(extras['alternate_identifier'])
 
-        s = RDFSerializer(profiles=['euro_dcat_ap', 'edp_dcat_ap'])
+        s = RDFSerializer(profiles=['euro_dcat_ap', 'dcat_ap_2.0.1'])
         g = s.g
         dataset_ref = s.graph_from_dataset(dataset)
 
@@ -398,7 +397,7 @@ class TestEDPDCATAPProfileSerializeDataset(BaseSerializeTest):
         ])
         extras = self._extras(dataset)
 
-        s = RDFSerializer(profiles=['euro_dcat_ap', 'edp_dcat_ap'])
+        s = RDFSerializer(profiles=['euro_dcat_ap', 'dcat_ap_2.0.1'])
         g = s.g
         dataset_ref = s.graph_from_dataset(dataset)
 
@@ -423,7 +422,7 @@ class TestEDPDCATAPProfileSerializeDataset(BaseSerializeTest):
         extras = self._extras(dataset)
         sample_list = json.loads(extras['sample'])
 
-        s = RDFSerializer(profiles=['euro_dcat_ap', 'edp_dcat_ap'])
+        s = RDFSerializer(profiles=['euro_dcat_ap', 'dcat_ap_2.0.1'])
         g = s.g
         dataset_ref = s.graph_from_dataset(dataset)
 
@@ -445,7 +444,7 @@ class TestEDPDCATAPProfileSerializeDataset(BaseSerializeTest):
         extras = self._extras(dataset)
         source_list = json.loads(extras['source'])
 
-        s = RDFSerializer(profiles=['euro_dcat_ap', 'edp_dcat_ap'])
+        s = RDFSerializer(profiles=['euro_dcat_ap', 'dcat_ap_2.0.1'])
         g = s.g
         dataset_ref = s.graph_from_dataset(dataset)
 
@@ -464,7 +463,7 @@ class TestEDPDCATAPProfileSerializeDataset(BaseSerializeTest):
         ])
         extras = self._extras(dataset)
 
-        s = RDFSerializer(profiles=['euro_dcat_ap', 'edp_dcat_ap'])
+        s = RDFSerializer(profiles=['euro_dcat_ap', 'dcat_ap_2.0.1'])
         g = s.g
         dataset_ref = s.graph_from_dataset(dataset)
 
@@ -493,7 +492,7 @@ class TestEDPDCATAPProfileSerializeDataset(BaseSerializeTest):
             }
         ]
 
-        s = RDFSerializer(profiles=['euro_dcat_ap', 'edp_dcat_ap'])
+        s = RDFSerializer(profiles=['euro_dcat_ap', 'dcat_ap_2.0.1'])
         g = s.g
         dataset_ref = s.graph_from_dataset(dataset)
 
@@ -513,7 +512,7 @@ class TestEDPDCATAPProfileSerializeDataset(BaseSerializeTest):
             dataset, resource = self._get_base_dataset_and_resource()
             resource['mimetype'] = 'application/json'
 
-            s = RDFSerializer(profiles=['euro_dcat_ap', 'edp_dcat_ap'])
+            s = RDFSerializer(profiles=['euro_dcat_ap', 'dcat_ap_2.0.1'])
             g = s.g
             dataset_ref = s.graph_from_dataset(dataset)
             distribution = self._triple(
@@ -530,7 +529,7 @@ class TestEDPDCATAPProfileSerializeDataset(BaseSerializeTest):
             dataset, resource = self._get_base_dataset_and_resource()
             resource['format'] = 'JSON'
 
-            s = RDFSerializer(profiles=['euro_dcat_ap', 'edp_dcat_ap'])
+            s = RDFSerializer(profiles=['euro_dcat_ap', 'dcat_ap_2.0.1'])
             g = s.g
             dataset_ref = s.graph_from_dataset(dataset)
             distribution = self._triple(
@@ -547,7 +546,7 @@ class TestEDPDCATAPProfileSerializeDataset(BaseSerializeTest):
             dataset, resource = self._get_base_dataset_and_resource()
             resource['mimetype'] = 'NOTEXIST'
 
-            s = RDFSerializer(profiles=['euro_dcat_ap', 'edp_dcat_ap'])
+            s = RDFSerializer(profiles=['euro_dcat_ap', 'dcat_ap_2.0.1'])
             g = s.g
             dataset_ref = s.graph_from_dataset(dataset)
             distribution = self._triple(
@@ -563,7 +562,7 @@ class TestEDPDCATAPProfileSerializeDataset(BaseSerializeTest):
             dataset, resource = self._get_base_dataset_and_resource()
             resource['mimetype'] = 'application/json'
 
-            s = RDFSerializer(profiles=['euro_dcat_ap', 'edp_dcat_ap'])
+            s = RDFSerializer(profiles=['euro_dcat_ap', 'dcat_ap_2.0.1'])
             g = s.g
             dataset_ref = s.graph_from_dataset(dataset)
             distribution = self._triple(
@@ -581,7 +580,7 @@ class TestEDPDCATAPProfileSerializeDataset(BaseSerializeTest):
             dataset, resource = self._get_base_dataset_and_resource()
             resource['format'] = 'JSON'
 
-            s = RDFSerializer(profiles=['euro_dcat_ap', 'edp_dcat_ap'])
+            s = RDFSerializer(profiles=['euro_dcat_ap', 'dcat_ap_2.0.1'])
             g = s.g
             dataset_ref = s.graph_from_dataset(dataset)
             distribution = self._triple(
@@ -599,7 +598,7 @@ class TestEDPDCATAPProfileSerializeDataset(BaseSerializeTest):
             dataset, resource = self._get_base_dataset_and_resource()
             resource['format'] = 'NOTEXIST'
 
-            s = RDFSerializer(profiles=['euro_dcat_ap', 'edp_dcat_ap'])
+            s = RDFSerializer(profiles=['euro_dcat_ap', 'dcat_ap_2.0.1'])
             g = s.g
             dataset_ref = s.graph_from_dataset(dataset)
             distribution = self._triple(
@@ -616,7 +615,7 @@ class TestEDPDCATAPProfileSerializeDataset(BaseSerializeTest):
             resource['mimetype'] = 'application/json'
             resource['format'] = 'CSV'
 
-            s = RDFSerializer(profiles=['euro_dcat_ap', 'edp_dcat_ap'])
+            s = RDFSerializer(profiles=['euro_dcat_ap', 'dcat_ap_2.0.1'])
             g = s.g
             dataset_ref = s.graph_from_dataset(dataset)
             distribution = self._triple(
@@ -650,7 +649,7 @@ class TestEDPDCATAPProfileSerializeDataset(BaseSerializeTest):
         resource['license_type'] = "http://purl.org/adms/licencetype/PublicDomain"
 
 
-        s = RDFSerializer(profiles=['euro_dcat_ap', 'edp_dcat_ap'])
+        s = RDFSerializer(profiles=['euro_dcat_ap', 'dcat_ap_2.0.1'])
         g = s.g
         dataset_ref = s.graph_from_dataset(dataset)
         distribution = self._triple(g, dataset_ref, DCAT.distribution, None)[2]
@@ -669,7 +668,7 @@ class TestEDPDCATAPProfileSerializeDataset(BaseSerializeTest):
         resource['license_type'] = 'PublicDomain'
 
 
-        s = RDFSerializer(profiles=['euro_dcat_ap', 'edp_dcat_ap'])
+        s = RDFSerializer(profiles=['euro_dcat_ap', 'dcat_ap_2.0.1'])
         g = s.g
         dataset_ref = s.graph_from_dataset(dataset)
         distribution = self._triple(g, dataset_ref, DCAT.distribution, None)[2]
@@ -688,7 +687,7 @@ class TestEDPDCATAPProfileSerializeDataset(BaseSerializeTest):
         dataset, resource = self._get_base_dataset_and_resource()
         resource['license'] = 'http://publications.europa.eu/resource/authority/licence/CC_BY_4_0'
 
-        s = RDFSerializer(profiles=['euro_dcat_ap', 'edp_dcat_ap'])
+        s = RDFSerializer(profiles=['euro_dcat_ap', 'dcat_ap_2.0.1'])
         g = s.g
         dataset_ref = s.graph_from_dataset(dataset)
         distribution = self._triple(g, dataset_ref, DCAT.distribution, None)[2]
@@ -705,7 +704,7 @@ class TestEDPDCATAPProfileSerializeDataset(BaseSerializeTest):
         resource['license_type'] = 'http://purl.org/adms/licencetype/PublicDomain'
 
 
-        s = RDFSerializer(profiles=['euro_dcat_ap', 'edp_dcat_ap'])
+        s = RDFSerializer(profiles=['euro_dcat_ap', 'dcat_ap_2.0.1'])
         g = s.g
         dataset_ref = s.graph_from_dataset(dataset)
         distribution = self._triple(g, dataset_ref, DCAT.distribution, None)[2]
@@ -722,7 +721,7 @@ class TestEDPDCATAPProfileSerializeDataset(BaseSerializeTest):
         dataset, resource = self._get_base_dataset_and_resource()
         resource['availability'] = "http://dcat-ap.de/def/plannedAvailability/stable"
 
-        s = RDFSerializer(profiles=['euro_dcat_ap', 'edp_dcat_ap'])
+        s = RDFSerializer(profiles=['euro_dcat_ap', 'dcat_ap_2.0.1'])
         g = s.g
         dataset_ref = s.graph_from_dataset(dataset)
         distribution = self._triple(g, dataset_ref, DCAT.distribution, None)[2]
@@ -736,7 +735,7 @@ class TestEDPDCATAPProfileSerializeDataset(BaseSerializeTest):
         dataset, resource = self._get_base_dataset_and_resource()
         resource['availability'] = "stable"
 
-        s = RDFSerializer(profiles=['euro_dcat_ap', 'edp_dcat_ap'])
+        s = RDFSerializer(profiles=['euro_dcat_ap', 'dcat_ap_2.0.1'])
         g = s.g
         dataset_ref = s.graph_from_dataset(dataset)
         distribution = self._triple(g, dataset_ref, DCAT.distribution, None)[2]
@@ -752,7 +751,7 @@ class TestEDPDCATAPProfileSerializeDataset(BaseSerializeTest):
         conforms_to_list = json.loads(resource['conforms_to'])
 
 
-        s = RDFSerializer(profiles=['euro_dcat_ap', 'edp_dcat_ap'])
+        s = RDFSerializer(profiles=['euro_dcat_ap', 'dcat_ap_2.0.1'])
         g = s.g
         dataset_ref = s.graph_from_dataset(dataset)
         distribution = self._triple(g, dataset_ref, DCAT.distribution, None)[2]
@@ -770,7 +769,7 @@ class TestEDPDCATAPProfileSerializeDataset(BaseSerializeTest):
         dataset, resource = self._get_base_dataset_and_resource()
         resource['rights'] = 'Some statement about resource rights'
 
-        s = RDFSerializer(profiles=['euro_dcat_ap', 'edp_dcat_ap'])
+        s = RDFSerializer(profiles=['euro_dcat_ap', 'dcat_ap_2.0.1'])
         g = s.g
         dataset_ref = s.graph_from_dataset(dataset)
         distribution = self._triple(g, dataset_ref, DCAT.distribution, None)[2]
@@ -790,7 +789,7 @@ class TestEDPDCATAPProfileSerializeDataset(BaseSerializeTest):
 
         documentation_to_list = json.loads(resource['documentation'])
 
-        s = RDFSerializer(profiles=['euro_dcat_ap', 'edp_dcat_ap'])
+        s = RDFSerializer(profiles=['euro_dcat_ap', 'dcat_ap_2.0.1'])
         g = s.g
         dataset_ref = s.graph_from_dataset(dataset)
         distribution = self._triple(g, dataset_ref, DCAT.distribution, None)[2]

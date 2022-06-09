@@ -1,7 +1,9 @@
-from iso639 import languages
-
-from ckan.plugins import toolkit
 import ckan.model as model
+from ckan.plugins import toolkit
+from ckanext.dcat.utils import dataset_id_from_resource, resource_uri
+from iso639 import languages
+from ckanext.dcatapedp.profiles.namespaces import DCAT, RDF
+
 
 def unified_resource_format_iana(format):
     '''
@@ -81,3 +83,37 @@ def get_earliest_datestamp():
     return model.Session.query(model.Package.metadata_modified).\
         order_by(model.Package.metadata_modified).first()[0]
 
+
+def distribution_id_from_distributions(g, resource_dict):
+    '''
+
+    Finds the complete subject
+    1. The value of the uri field
+    2.(catalog + dataset + distribution) of a distribution
+    from dataset id and resource id
+    3. return from ckanex.dcat.utils resource_uri
+    '''
+    uri = resource_dict.get('uri')
+    if not uri or uri == 'None':
+        distributions = g.subjects(RDF.type, DCAT.Distribution)
+        dataset_id = dataset_id_from_resource(resource_dict)
+        resource_id = resource_dict.get('id')
+        # TODO with ckan.lib.helpers.url_for
+        uri_part = 'dataset/{0}/resource/{1}'.format(dataset_id, resource_id)
+        for distribution in distributions:
+            if (uri_part in distribution):
+                uri = distribution
+        if not uri or uri == 'None':
+            uri = resource_uri(resource_dict)
+    return uri
+
+
+def add_or_replace_from_extra(dictionary, key, value):
+    if not 'extras' in dictionary:
+        dictionary['extras'] = []
+    for extra in dictionary.get('extras', []):
+        if extra['key'] == key:
+            extra['value'] = value
+            return
+
+    dictionary['extras'].append({'key': key, 'value': value})

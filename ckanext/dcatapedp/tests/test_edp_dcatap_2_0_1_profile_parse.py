@@ -11,10 +11,9 @@ from rdflib import Graph, URIRef, BNode, Literal
 from ckan.plugins import toolkit
 
 from ckanext.dcat.processors import RDFParser
-from ckanext.dcatapedp.profiles import (
-    DCT, DCAT, DCATAP, VCARD, FOAF, LOCN, GSP,
-    OWL, SKOS, EU_CORPORATE_BODY_SCHEMA_URI, ADMS)
-from rdflib.namespace import RDF, XSD, RDFS
+
+from ckanext.dcatapedp.profiles.namespaces import *
+from ckanext.dcatapedp.profiles.controlled_vocabularies import *
 
 
 class BaseParseTest(object):
@@ -97,7 +96,7 @@ class TestEDPDCATAPProfileSerializeDataset(BaseParseTest):
     def test_dataset_from_graph(self):
 
         g, dataset_ref = self._get_base_graph()
-        p = RDFParser(profiles=['euro_dcat_ap', 'edp_dcat_ap'])
+        p = RDFParser(profiles=['euro_dcat_ap', 'dcat_ap_2.0.1'])
         p.g = g
 
         dataset_base = self._get_base_dataset()
@@ -120,7 +119,7 @@ class TestEDPDCATAPProfileSerializeDataset(BaseParseTest):
         g.add((dataset_ref, DCAT['landingPage'], landing_page_ref))
         g.add((landing_page_ref, RDF.type, FOAF.Document))
 
-        p = RDFParser(profiles=['euro_dcat_ap', 'edp_dcat_ap'])
+        p = RDFParser(profiles=['euro_dcat_ap', 'dcat_ap_2.0.1'])
         p.g = g
 
         dataset = [d for d in p.datasets()][0]
@@ -137,7 +136,7 @@ class TestEDPDCATAPProfileSerializeDataset(BaseParseTest):
         g.add((dataset_ref, DCT['publisher'], organization_ref))
         g.add((organization_ref, RDF.type, FOAF.Agent))
 
-        p = RDFParser(profiles=['euro_dcat_ap', 'edp_dcat_ap'])
+        p = RDFParser(profiles=['euro_dcat_ap', 'dcat_ap_2.0.1'])
         p.g = g
 
         dataset = [d for d in p.datasets()][0]
@@ -156,7 +155,7 @@ class TestEDPDCATAPProfileSerializeDataset(BaseParseTest):
         schema = URIRef(EU_CORPORATE_BODY_SCHEMA_URI)
         g.add((organization_ref, SKOS.inScheme, schema))
 
-        p = RDFParser(profiles=['euro_dcat_ap', 'edp_dcat_ap'])
+        p = RDFParser(profiles=['euro_dcat_ap', 'dcat_ap_2.0.1'])
         p.g = g
 
         dataset = [d for d in p.datasets()][0]
@@ -178,7 +177,7 @@ class TestEDPDCATAPProfileSerializeDataset(BaseParseTest):
         g.add((contact_ref, VCARD['hasEmail'],
                Literal('mailto:' + contact_email)))
 
-        p = RDFParser(profiles=['euro_dcat_ap', 'edp_dcat_ap'])
+        p = RDFParser(profiles=['euro_dcat_ap', 'dcat_ap_2.0.1'])
         p.g = g
 
         dataset = [d for d in p.datasets()][0]
@@ -204,7 +203,7 @@ class TestEDPDCATAPProfileSerializeDataset(BaseParseTest):
         g.add((temporal_ref, DCAT['endDate'], Literal(
             end_date_parsed, datatype=XSD.dateTime)))
 
-        p = RDFParser(profiles=['euro_dcat_ap', 'edp_dcat_ap'])
+        p = RDFParser(profiles=['euro_dcat_ap', 'dcat_ap_2.0.1'])
         p.g = g
 
         dataset = [d for d in p.datasets()][0]
@@ -230,7 +229,7 @@ class TestEDPDCATAPProfileSerializeDataset(BaseParseTest):
         g.add((spatial_uri, DCAT['centroid'], Literal(
             wkt.dumps(json.loads(spatial_centroid), decimals=4), datatype=GSP.wktLiteral)))
 
-        p = RDFParser(profiles=['euro_dcat_ap', 'edp_dcat_ap'])
+        p = RDFParser(profiles=['euro_dcat_ap', 'dcat_ap_2.0.1'])
         p.g = g
 
         dataset = [d for d in p.datasets()][0]
@@ -260,7 +259,7 @@ class TestEDPDCATAPProfileSerializeDataset(BaseParseTest):
         g.add((conforms_to_ref_1, RDFS.label,
                Literal(conforms_to_list[1])))
         
-        p = RDFParser(profiles=['euro_dcat_ap', 'edp_dcat_ap'])
+        p = RDFParser(profiles=['euro_dcat_ap', 'dcat_ap_2.0.1'])
         p.g = g
         dataset = [d for d in p.datasets()][0]
         extras = self._extras(dataset)
@@ -287,7 +286,7 @@ class TestEDPDCATAPProfileSerializeDataset(BaseParseTest):
         g.add((adms_identifier_ref_1, SKOS.notation,
                Literal(adms_identifier_list[1])))
         
-        p = RDFParser(profiles=['euro_dcat_ap', 'edp_dcat_ap'])
+        p = RDFParser(profiles=['euro_dcat_ap', 'dcat_ap_2.0.1'])
         p.g = g
         dataset = [d for d in p.datasets()][0]
         extras = self._extras(dataset)
@@ -304,7 +303,7 @@ class TestEDPDCATAPProfileSerializeDataset(BaseParseTest):
         g.add((provenance_ref, RDF.type, DCT.ProvenanceStatement))
         g.add((provenance_ref, RDFS.label, Literal(provenance)))
 
-        p = RDFParser(profiles=['euro_dcat_ap', 'edp_dcat_ap'])
+        p = RDFParser(profiles=['euro_dcat_ap', 'dcat_ap_2.0.1'])
         p.g = g
 
         dataset = [d for d in p.datasets()][0]
@@ -325,7 +324,7 @@ class TestEDPDCATAPProfileSerializeDataset(BaseParseTest):
         g.add((dct_type_ref, RDF.type, SKOS.Concept))
         g.add((dct_type_ref, SKOS.prefLabel, Literal(dct_type)))
 
-        p = RDFParser(profiles=['euro_dcat_ap', 'edp_dcat_ap'])
+        p = RDFParser(profiles=['euro_dcat_ap', 'dcat_ap_2.0.1'])
         p.g = g
 
         dataset = [d for d in p.datasets()][0]
@@ -337,7 +336,7 @@ class TestEDPDCATAPProfileSerializeDataset(BaseParseTest):
     # Resources
     def test_graph_from_resource(self):
         g, dataset_ref, distribution_ref = self._get_base_graph_with_resource()
-        p = RDFParser(profiles=['euro_dcat_ap', 'edp_dcat_ap'])
+        p = RDFParser(profiles=['euro_dcat_ap', 'dcat_ap_2.0.1'])
         p.g = g
 
         dataset_base, resource_base = self._get_base_dataset_and_resource()
@@ -377,7 +376,7 @@ class TestEDPDCATAPProfileSerializeDataset(BaseParseTest):
             g.add((distribution_ref, DCAT['mediaType'], IANA_media_type_json_ref))
             g.add((IANA_media_type_json_ref, RDF['type'], DCT['MediaType']))
 
-            p = RDFParser(profiles=['euro_dcat_ap', 'edp_dcat_ap'])
+            p = RDFParser(profiles=['euro_dcat_ap', 'dcat_ap_2.0.1'])
             p.g = g
 
             dataset = [d for d in p.datasets()][0]
@@ -397,7 +396,7 @@ class TestEDPDCATAPProfileSerializeDataset(BaseParseTest):
             g.add((distribution_ref, DCT['format'], EU_format_type_json_ref))
             g.add((EU_format_type_json_ref, RDF['type'], DCT['MediaTypeOrExtent']))
 
-            p = RDFParser(profiles=['euro_dcat_ap', 'edp_dcat_ap'])
+            p = RDFParser(profiles=['euro_dcat_ap', 'dcat_ap_2.0.1'])
             p.g = g
 
             dataset = [d for d in p.datasets()][0]
@@ -418,7 +417,7 @@ class TestEDPDCATAPProfileSerializeDataset(BaseParseTest):
             g.add((distribution_ref, DCAT['mediaType'], IANA_media_type_json_ref))
             g.add((IANA_media_type_json_ref, RDF['type'], DCT['MediaType']))
 
-            p = RDFParser(profiles=['euro_dcat_ap', 'edp_dcat_ap'])
+            p = RDFParser(profiles=['euro_dcat_ap', 'dcat_ap_2.0.1'])
             p.g = g
 
             dataset = [d for d in p.datasets()][0]
@@ -445,7 +444,7 @@ class TestEDPDCATAPProfileSerializeDataset(BaseParseTest):
             g.add((distribution_ref, DCAT['mediaType'], IANA_media_type_json_ref))
             g.add((IANA_media_type_json_ref, RDF['type'], DCT['MediaType']))
 
-            p = RDFParser(profiles=['euro_dcat_ap', 'edp_dcat_ap'])
+            p = RDFParser(profiles=['euro_dcat_ap', 'dcat_ap_2.0.1'])
             p.g = g
 
             dataset = [d for d in p.datasets()][0]
@@ -466,7 +465,7 @@ class TestEDPDCATAPProfileSerializeDataset(BaseParseTest):
         g.add((license_ref, RDF['type'], DCT['LicenseDocument']))
         g.add(((license_ref, DCT['type'], license_type)))
 
-        p = RDFParser(profiles=['euro_dcat_ap', 'edp_dcat_ap'])
+        p = RDFParser(profiles=['euro_dcat_ap', 'dcat_ap_2.0.1'])
         p.g = g
 
         dataset = [d for d in p.datasets()][0]
@@ -489,7 +488,7 @@ class TestEDPDCATAPProfileSerializeDataset(BaseParseTest):
         g.add(((license_ref, DCT['title'], Literal(license_name))))
         g.add(((license_ref, DCT['type'], Literal(license_type))))
 
-        p = RDFParser(profiles=['euro_dcat_ap', 'edp_dcat_ap'])
+        p = RDFParser(profiles=['euro_dcat_ap', 'dcat_ap_2.0.1'])
         p.g = g
 
         dataset = [d for d in p.datasets()][0]
@@ -508,7 +507,7 @@ class TestEDPDCATAPProfileSerializeDataset(BaseParseTest):
         g.add((distribution_ref, DCT['license'], license_ref))
         g.add((license_ref, RDF['type'], DCT['LicenseDocument']))
 
-        p = RDFParser(profiles=['euro_dcat_ap', 'edp_dcat_ap'])
+        p = RDFParser(profiles=['euro_dcat_ap', 'dcat_ap_2.0.1'])
         p.g = g
 
         dataset = [d for d in p.datasets()][0]
@@ -528,7 +527,7 @@ class TestEDPDCATAPProfileSerializeDataset(BaseParseTest):
         g.add((license_ref, RDF['type'], DCT['LicenseDocument']))
         g.add(((license_ref, DCT['type'], license_type)))
 
-        p = RDFParser(profiles=['euro_dcat_ap', 'edp_dcat_ap'])
+        p = RDFParser(profiles=['euro_dcat_ap', 'dcat_ap_2.0.1'])
         p.g = g
 
         dataset = [d for d in p.datasets()][0]
@@ -546,7 +545,7 @@ class TestEDPDCATAPProfileSerializeDataset(BaseParseTest):
 
         g.add((distribution_ref, DCATAP['availability'], availability))
 
-        p = RDFParser(profiles=['euro_dcat_ap', 'edp_dcat_ap'])
+        p = RDFParser(profiles=['euro_dcat_ap', 'dcat_ap_2.0.1'])
         p.g = g
 
         dataset = [d for d in p.datasets()][0]
@@ -563,7 +562,7 @@ class TestEDPDCATAPProfileSerializeDataset(BaseParseTest):
         g.add(
             (distribution_ref, DCATAP['availability'], Literal(availability)))
 
-        p = RDFParser(profiles=['euro_dcat_ap', 'edp_dcat_ap'])
+        p = RDFParser(profiles=['euro_dcat_ap', 'dcat_ap_2.0.1'])
         p.g = g
 
         dataset = [d for d in p.datasets()][0]
@@ -589,7 +588,7 @@ class TestEDPDCATAPProfileSerializeDataset(BaseParseTest):
         g.add((conforms_to_ref_1, RDFS.label,
                Literal(conforms_to_list[1])))
         
-        p = RDFParser(profiles=['euro_dcat_ap', 'edp_dcat_ap'])
+        p = RDFParser(profiles=['euro_dcat_ap', 'dcat_ap_2.0.1'])
         p.g = g
         dataset = [d for d in p.datasets()][0]
         resource = dataset.get('resources')[0]

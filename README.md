@@ -76,9 +76,9 @@ CKAN extension for the European Data Portal
 
         pip install -e ckanext-dcatapedp
 
-5. Active the edp_dcat_ap profile in the `production.ini` file:
+5. Active the dcat_ap_2.0.1 profile in the `production.ini` file:
 
-        ckanext.dcat.rdf.profiles = euro_dcat_ap edp_dcat_ap
+        ckanext.dcat.rdf.profiles = euro_dcat_ap dcat_ap_2.0.1
 
 6. Restart CKAN. For example if you've deployed CKAN with Apache on Ubuntu::
 
@@ -179,7 +179,7 @@ To publish a new version to PyPI follow these steps:
  - **Type**: origin of the dcat mapping being 
    - *O: taken from original profile without modifying it (euro_dcat_ap)*; 
    - *M: taken from the original profile (euro_dcat_ap) modifying it*; 
-   - *A: new property added in the edp_dcat_ap profile*
+   - *A: new property added in the dcat_ap_2.0.1 profile*
  - **Stored as**: way it is stored in the CKAN instance
  - **Ref. vocab.**: reference vocabularies recommended to use
  - **Notes**: additional information 

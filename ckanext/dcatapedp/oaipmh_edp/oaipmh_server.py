@@ -15,7 +15,7 @@ from ckan.logic import get_action
 from ckan.model import Package, Session, Group, PackageRevision
 from ckanext.dcat.processors import RDFSerializer
 # from ckanext.kata import helpers
-from ckanext.dcatapedp.utils import get_earliest_datestamp
+from ckanext.dcatapedp.profiles.utils import get_earliest_datestamp
 
 log = logging.getLogger(__name__)
 
@@ -166,7 +166,7 @@ class CKANServer(ResumptionOAIPMH):
         if metadataPrefix == 'rdf':
             return self._record_for_dataset_dcat(package, spec, profiles=['euro_dcat_ap'])
         if metadataPrefix == 'dcat':
-            return self._record_for_dataset_dcat(package, spec, profiles=['euro_dcat_ap', 'edp_dcat_ap'])
+            return self._record_for_dataset_dcat(package, spec, profiles=['euro_dcat_ap', 'dcat_ap_2.0.1'])
         return self._record_for_dataset(package, spec)
 
     def listIdentifiers(self, metadataPrefix=None, set=None, cursor=None,
@@ -218,7 +218,7 @@ class CKANServer(ResumptionOAIPMH):
             if metadataPrefix == 'rdf':
                 data.append(self._record_for_dataset_dcat(package, spec, profiles=['euro_dcat_ap']))
             elif metadataPrefix == 'dcat':
-                data.append(self._record_for_dataset_dcat(package, spec, profiles=['euro_dcat_ap', 'edp_dcat_ap']))
+                data.append(self._record_for_dataset_dcat(package, spec, profiles=['euro_dcat_ap', 'dcat_ap_2.0.1']))
             else:
                 data.append(self._record_for_dataset(package, spec))
         return data
