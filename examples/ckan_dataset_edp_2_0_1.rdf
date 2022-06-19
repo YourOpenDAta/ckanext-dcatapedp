@@ -13,7 +13,9 @@
 >
   <dcat:Dataset rdf:about="http://example_dataset">
     <dct:identifier>cf3dcff7-34ae-4fab-a202-2f17e3153b2f</dct:identifier>
-    <dcat:theme rdf:resource="http://publications.europa.eu/resource/authority/data-theme/EDUC"/>
+    <dcat:theme>
+        <skos:Concept rdf:about="http://publications.europa.eu/resource/authority/data-theme/EDUC"/>
+     </dcat:theme>
     <dcat:keyword>newTag2</dcat:keyword>
     <dcat:contactPoint>
       <vcard:Kind rdf:about="http://localhost/ContactUri">
@@ -40,10 +42,14 @@
       </dct:Location>
     </dct:spatial>
     <dct:description>Description example of dataset test</dct:description>
-    <dcat:theme rdf:resource="http://publications.europa.eu/resource/authority/data-theme/ECON"/>
+    <dcat:theme>
+        <skos:Concept rdf:about="http://publications.europa.eu/resource/authority/data-theme/TECH"/>
+     </dcat:theme>
     <dct:publisher>
       <foaf:Agent rdf:about="http://publications.europa.eu/resource/authority/corporate-body/SPC">
-        <dct:type rdf:resource="http://purl.org/adms/publishertype/Academia-ScientificOrganisation"/>
+        <dct:type>
+          <skos:Concept rdf:about="http://purl.org/adms/publishertype/Academia-ScientificOrganisation"/>
+    </dct:type>
         <foaf:name>exampleorg</foaf:name>
       </foaf:Agent>
     </dct:publisher>
@@ -69,13 +75,27 @@
     <foaf:page>
       <foaf:Document rdf:about="http://page2"/>
     </foaf:page>
-    <dct:accrualPeriodicity rdf:resource="http://purl.org/cld/freq/daily"/>
-    <dct:isVersionOf rdf:resource="http://dataset1"/>
-    <dct:isVersionOf rdf:resource="http://dataset2"/>
-    <dct:hasVersion rdf:resource="http://dataset1"/>
-    <dct:hasVersion rdf:resource="http://dataset2"/>
-    <dct:language rdf:resource="http://publications.europa.eu/resource/authority/language/SPA"/>
-    <dct:language rdf:resource="http://publications.europa.eu/resource/authority/language/GAL"/>
+    <dct:accrualPeriodicity>
+      <dct:Frequency rdf:about="http://purl.org/cld/freq/daily"/>
+    </dct:accrualPeriodicity>
+    <dct:isVersionOf>
+     <dcat:Dataset rdf:about="http://dataset1"/>
+    </dct:isVersionOf>
+    <dct:isVersionOf>
+     <dcat:Dataset rdf:about="http://dataset2"/>
+    </dct:isVersionOf>
+    <dct:hasVersion>
+     <dcat:Dataset rdf:about="http://dataset1"/>
+    </dct:hasVersion>
+    <dct:hasVersion>
+     <dcat:Dataset rdf:about="http://dataset2"/>
+    </dct:hasVersion>    
+    <dct:language>
+      <dct:LinguisticSystem rdf:about="http://publications.europa.eu/resource/authority/language/SPA"/>
+    </dct:language>
+    <dct:language>
+      <dct:LinguisticSystem rdf:about="http://publications.europa.eu/resource/authority/language/GAL"/>
+    </dct:language>
     <adms:identifier>
       <adms:Identifier rdf:nodeID="N7e41687e3b53467c95ba9422fc3e0d5f">
         <skos:notation>alternate_identifier_1</skos:notation>
@@ -94,10 +114,18 @@
     <dct:issued rdf:datatype="http://www.w3.org/2001/XMLSchema#dateTime">2022-01-02T11:31:11.500592</dct:issued>
     <dct:modified rdf:datatype="http://www.w3.org/2001/XMLSchema#dateTime">2022-01-03T11:31:11.500592</dct:modified>
     <adms:versionNotes>2.0.1</adms:versionNotes>
-    <adms:sample rdf:resource="http://Distribution1"/>
-    <adms:sample rdf:resource="http://Distribution2"/>
-    <dct:source rdf:resource="http://Dataset1"/>
-    <dct:source rdf:resource="http://Dataset2"/>
+    <adms:sample>
+      <dcat:Distribution rdf:about="http://Distribution1"/>
+    </adms:sample>
+    <adms:sample>
+      <dcat:Distribution rdf:about="http://Distribution2"/>
+      </adms:sample>
+    <dct:source>
+     <dcat:Dataset rdf:about="http://dataset1"/>
+    </dct:source>
+    <dct:source>
+     <dcat:Dataset rdf:about="http://dataset2"/>
+    </dct:source>
     <dct:type>
       <skos:Concept rdf:nodeID="N98d6b58b2ff040a0a9656319d55f5cf9">
         <skos:prefLabel>dataset</skos:prefLabel>
@@ -111,10 +139,14 @@
       <dct:description>Example description of Example Resource</dct:description>
       <dcat:mediaType rdf:resource="https://www.iana.org/assignments/media-types/application/json"/>
       <dcat:downloadURL rdf:resource="http://localhost/downloadURL"/>
-      <dct:license rdf:resource="http://publications.europa.eu/resource/authority/licence/CC_BY_4_0"/>
+      <dct:license>
+        <dct:LicenseDocument rdf:about="http://publications.europa.eu/resource/authority/licence/CC_BY_4_0"/>
+      </dct:license>
       <dcat:byteSize rdf:datatype="http://www.w3.org/2001/XMLSchema#decimal">200000000.0</dcat:byteSize>
       <dcatap:availability rdf:resource="http://dcat-ap.de/def/plannedAvailability/stable"/>
-      <adms:status rdf:resource="http://purl.org/adms/status/Completed"/>
+      <adms:status>
+        <skos:Concept rdf:about="http://purl.org/adms/status/Completed"/>
+      </adms:status>
       <dct:conformsTo>
         <dct:Standard rdf:nodeID="Nc765b218145049b08a5fef3e384393d4">
           <rdfs:label>Standard distribution 1</rdfs:label>
@@ -124,11 +156,15 @@
         <dct:Standard rdf:nodeID="Nc765b218145049b08a5fef3e384393d2">
           <rdfs:label>Standard distribution 2</rdfs:label>
         </dct:Standard>
-      </dct:conformsTo>,
+      </dct:conformsTo>
       <dct:modified rdf:datatype="http://www.w3.org/2001/XMLSchema#dateTime">2022-01-05T15:01:07.173973</dct:modified>
       <dct:issued rdf:datatype="http://www.w3.org/2001/XMLSchema#dateTime">2022-01-06T15:01:07.173973</dct:issued>
-      <dct:language rdf:resource="http://publications.europa.eu/resource/authority/language/ENG"/>
-      <dct:language rdf:resource="http://publications.europa.eu/resource/authority/language/FRA"/>
+      <dct:language>
+        <dct:LinguisticSystem rdf:about="http://publications.europa.eu/resource/authority/language/SPA"/>
+      </dct:language>
+      <dct:language>
+        <dct:LinguisticSystem rdf:about="http://publications.europa.eu/resource/authority/language/GAL"/>
+      </dct:language>
       <dct:rights>
         <dct:RightsStatement rdf:nodeID="Neaf6c525097e4b2cbdb974f615437e28">
           <rdfs:label>Some statement about resource rights</rdfs:label>
@@ -145,8 +181,5 @@
   </dcat:Dataset>
   <dct:MediaType rdf:about="https://www.iana.org/assignments/media-types/application/json"/>
   <dct:MediaTypeOrExtent rdf:about="http://publications.europa.eu/resource/authority/file-type/JSON"/>
-  <dct:LicenseDocument rdf:about="http://publications.europa.eu/resource/authority/licence/CC_BY_4_0">
-    <dct:type rdf:resource="http://purl.org/adms/licencetype/PublicDomain"/>
-  </dct:LicenseDocument>
-</rdf:RDF>
 
+</rdf:RDF>

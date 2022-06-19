@@ -8,12 +8,12 @@ from ckanext.dcatapedp.profiles.namespaces import *
 from ckanext.dcatapedp.profiles.utils import (
     unified_resource_format_ckan)
 from geomet import InvalidGeoJSONException, wkt
-from rdflib import BNode, Literal
+from rdflib import BNode, Literal, URIRef
 
 
 class DCATAPProfile_2(RDFProfile):
 
-    def _time_interval_edp(self, subject, predicate):
+    def time_interval_edp(self, subject, predicate):
         '''
         Returns the start and end date for a time interval object
         Both subject and predicate must be rdflib URIRef or BNode objects
@@ -32,7 +32,7 @@ class DCATAPProfile_2(RDFProfile):
 
         return start_date, end_date
 
-    def _spatial_edp(self, subject, predicate):
+    def spatial_edp(self, subject, predicate):
         '''
         Returns geom and centroid with the value set to
         None if they could not be found.
@@ -62,26 +62,7 @@ class DCATAPProfile_2(RDFProfile):
 
         return geom, centr
 
-    def _distribution_license_edp(self, subject, predicate):
-        '''
-        Returns the license and the license type.
-        If the license is a BNode and not DCT.title it returns None.
-        None if they could not be found.
-        '''
-
-        license_ref = self.g.value(subject, predicate)
-
-        license = None
-        license_type = None
-        if license_ref:
-            license_type = self._object_value(license_ref, DCT.type)
-            if isinstance(license_ref, BNode):
-                license = self._object_value(license_ref, DCT.title)
-            else:
-                license = str(license_ref)
-        return license, license_type
-
-    def _distribution_format_edp(self, subject, normalize_ckan_format=True):
+    def distribution_format_edp(self, subject, normalize_ckan_format=True):
         '''
         Returns the Internet Media Type and format label for a distribution.
         Extracts the Internet Media Type from IANA complete URI or EU file type complete URI.
@@ -106,7 +87,7 @@ class DCATAPProfile_2(RDFProfile):
                     label = label_eu
         return imt, label
 
-    def _conforms_to_edp(self, subject):
+    def conforms_to_edp(self, subject):
         conformsToList = []
         for _, _, conforms_to_ref in self.g.triples((subject, DCT.conformsTo, None)):
             conformsToList.append(self._object_value(
@@ -115,8 +96,9 @@ class DCATAPProfile_2(RDFProfile):
             return json.dumps(conformsToList)
         else:
             return None
+    
 
-    def _generate_conforms_to_graph(self, subject):
+    def generate_conforms_to_graph(self, subject):
         g = self.g
         for _, _, conforms_to in g.triples((subject, DCT.conformsTo, None)):
             conforms_to_ref = BNode()
@@ -125,13 +107,32 @@ class DCATAPProfile_2(RDFProfile):
             g.add((conforms_to_ref, RDFS.label, Literal(conforms_to)))
             g.add((subject, DCT.conformsTo, conforms_to_ref))
 
-    def _generate_page_to_graph(self, subject):
-        g = self.g
-        for _, _, page in g.triples((subject, FOAF.page, None)):
-            page_ref = URIRefOrLiteral(page)
-            g.add((page_ref, RDF.type, FOAF.Document))
 
-    def _generate_rights_to_graph(self, subject, predicate):
+
+    def add_rdf_type(self, subject, predicate, new_rdf_type):
+        g = self.g
+        for _, _, object in g.triples((subject, predicate, None)):
+            object_ref = URIRefOrLiteral(object)
+            if isinstance(object_ref, URIRef):
+                g.add((object_ref, RDF.type, new_rdf_type))
+
+    def replace_ancient(self, subject, predicate):
+        g = self.g
+        for _, _, object in g.triples((subject, predicate, None)):
+            g.remove((subject, predicate, object))
+            g.add((subject, predicate, URIRefOrLiteral(object)))
+
+    def add_rdf_type_delete_ancient(self, subject, predicate, new_rdf_tpe):
+        self.replace_ancient(subject, predicate)
+        self.add_rdf_type(subject, predicate, new_rdf_tpe)
+
+    def generate_dependent_datasets_to_graph(self, subject, predicate):
+        self.add_rdf_type_delete_ancient(subject, predicate, DCAT['Dataset'])
+
+    def generate_dependent_distribution_to_graph(self, subject, predicate):
+        self.add_rdf_type_delete_ancient(subject, predicate, DCAT['Distribution'])        
+
+    def generate_rights_to_graph(self, subject, predicate):
         g = self.g
         access_rights = g.value(subject, predicate)
         if access_rights:

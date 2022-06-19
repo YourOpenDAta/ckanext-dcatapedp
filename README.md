@@ -47,15 +47,15 @@ CKAN extension for the European Data Portal
   - [Agent](#agent)
 - [Examples](#examples)
   - [Dataset (Package) and Distribution (Resource) CKAN metadata](#dataset-package-and-distribution-resource-ckan-metadata)
-  - [Dataset (Package) and Distribution (Resource) DCAT-AP v2.0.1 rdf](#dataset-package-and-distribution-resource-dcat-ap-v201-rdf)
+  - [Dataset (Package) and Distribution (Resource) DCAT-AP rdf](#dataset-package-and-distribution-resource-dcat-ap-rdf)
   - [Catalogue (Organization) CKAN metadata](#catalogue-organization-ckan-metadata)
   - [Catalogue (Organization) DCAT-AP v2.0.1 rdf](#catalogue-organization-dcat-ap-v201-rdf)
 - [License](#license)
 
 ## Requirements
 
-- The extension was developed for CKAN 2.8 `TODO: test in other versions`
-- It is based on the [ckanext-dcat extension](https://github.com/ckan/ckanext-dcat "ckanext-dcat extension")
+- The extension was developed for CKAN 2.9 `TODO: test in other versions`
+- It is based on the [ckanext-dcat extension](https://github.com/ckan/ckanext-dcat "ckanext-dcat extension") v1.1.3 `TODO: test in other versions`
 
 
 
@@ -203,7 +203,7 @@ To publish a new version to PyPI follow these steps:
 | dct:publisher | extra:publisher_uri | M | text  | http://publications.europa.eu/resource/authority/corporate-body | |
 | dct:spatial | extra:spatial_uri | M | text | http://publications.europa.eu/resource/authority/continent <br/> http://publications.europa.eu/resource/authority/country <br/> http://publications.europa.eu/resource/authority/place <br/> http://sws.geonames.org/ <br/> | |
 | dct:temporal | extra:temporal_start + <br/> extra:temporal_end | M | text | | |
-| dcat:theme | extra:theme | O | list | http://publications.europa.eu/resource/authority/data-theme | |
+| dcat:theme | extra:theme | M | list | http://publications.europa.eu/resource/authority/data-theme | |
 | adms:identifier | extra:alternate_identifier | M | list | | |
 | adms:sample | extra:sample | M | list | | |
 | adms:versionNotes | adms:versionNotes | O | text | | |
@@ -214,7 +214,7 @@ To publish a new version to PyPI follow these steps:
 | dct:hasVersion | extra:has_version | O | list | | |
 | dct:isVersionOf | extra:is_version_of | O | list | | |
 | dct:issued | extra:issued, metadata_created | O | text | | |
-| dct:language | extra:language | O | list | http://publications.europa.eu/resource/authority/language | |
+| dct:language | extra:language | M | list | http://publications.europa.eu/resource/authority/language | |
 | dct:modified | extra:modified, <br/> metadata_modified | O | text | | |
 | dct:provenance | extra:provenance | M | text | | |
 | dct:source | extra:source | M | list | | |
@@ -231,14 +231,14 @@ To publish a new version to PyPI follow these steps:
 | dcatap:availability | resource:availability | A | text | http://data.europa.eu/r5r/availability/ <br/> https://www.dcat-ap.de/def/plannedAvailability/1_0.html |  |
 | dct:description | resource:description | O | text |  |  |
 | dct:format | resource:format | M | text | http://publications.europa.eu/resource/authority/file-type |  |
-| dct:license | resource:license + <br/>  resource:license_type | M (license) <br/> A (license_type) | text | http://purl.org/adms/licencetype/ (license_type)  |  |
-| adms:status | resource:status | O | text | http://purl.org/adms/status |  |
+| dct:license | resource:license | M | text | TODO:include |  |
+| adms:status | resource:status | M | text | http://purl.org/adms/status |  |
 | dcat:byteSize | resource:size | O | number |  |  |
 | dcat:downloadURL | resource:download_url | O | text |  |  |
 | dcat:mediaType | resource:mimetype  | M | text | http://www.iana.org/assignments/media-types/media-types.xhtml |  |
 | dct:conformsTo | resource:conforms_to | M | list |  |  |
 | dct:issued | resource:issued | O | text |  |  |
-| dct:language | resource:languague | O | list | http://publications.europa.eu/resource/authority/language |  |
+| dct:language | resource:languague | M | list | http://publications.europa.eu/resource/authority/language |  |
 | dct:modified | resource:modified | O | text |  |  |
 | dct:rights | resource:rights | M | text |  |  |
 | dct:title | resource:name | O | text |  |  |
@@ -257,366 +257,16 @@ To publish a new version to PyPI follow these steps:
 
 ### Dataset (Package) and Distribution (Resource) CKAN metadata
 
-```json
-{
-  "license_title": "Creative Commons Attribution",
-  "maintainer": "",
-  "relationships_as_object": [],
-  "private": false,
-  "maintainer_email": "",
-  "num_tags": 2,
-  "id": "cf3dcff7-34ae-4fab-a202-2f17e3153b2f",
-  "uri": "http://example_dataset",
-  "metadata_created": "2021-07-08T11:31:11.500592",
-  "metadata_modified": "2021-07-08T12:08:15.177991",
-  "author": "",
-  "author_email": "",
-  "state": "active",
-  "version": "2.0",
-  "creator_user_id": "e7d900d6-f2f5-4e9e-abbc-ac96cddcb78e",
-  "num_resources": 1,
-  "tags": [
-    {
-      "vocabulary_id": null,
-      "state": "active",
-      "display_name": "newTag",
-      "id": "70264ca0-c848-4e84-801a-a3470bcd0127",
-      "name": "newTag"
-    },
-    {
-      "vocabulary_id": null,
-      "state": "active",
-      "display_name": "newTag2",
-      "id": "6665c96c-f1a3-4f6c-a4e0-123909f81eb7",
-      "name": "newTag2"
-    }
-  ],
-  "groups": [],
-  "license_id": "cc-by",
-  "relationships_as_subject": [],
-  "organization": {
-    "description": "",
-    "created": "2021-07-08T11:30:34.342878",
-    "title": "exampleorg",
-    "name": "exampleorg",
-    "is_organization": true,
-    "state": "active",
-    "image_url": "",
-    "revision_id": "8f5a5d59-122e-409c-a3ce-f08821699108",
-    "type": "organization",
-    "id": "fbdbf159-fe3d-4448-b586-421665dff216",
-    "approval_status": "approved"
-  },
-  "name": "examplepackage",
-  "isopen": true,
-  "url": "http://localhost/landingpageExample.es",
-  "notes": "Description example of dataset test",
-  "owner_org": "fbdbf159-fe3d-4448-b586-421665dff216",
-  "license_url": "http://www.opendefinition.org/licenses/cc-by",
-  "title": "examplepackage",
-  "revision_id": "4785b854-df04-4a61-b9a5-609fa6f15458",
-  "extras": [
-    {
-      "key": "contact_email",
-      "value": "maintainer@email.com"
-    },
-    {
-      "key": "contact_name",
-      "value": "MaintainerName ExampleSurname"
-    },
-    {
-      "key": "contact_uri",
-      "value": "http://localhost/ContactUri"
-    },
-    {
-      "key": "publisher_type",
-      "value": "http://purl.org/adms/publishertype/Academia-ScientificOrganisation"
-    },
-    {
-      "key": "publisher_uri",
-      "value": "http://publications.europa.eu/resource/authority/corporate-body/SPC"
-    },
-    {
-      "key": "spatial",
-      "value": "{\"type\": \"Polygon\", \"coordinates\": [[[175.0, 17.5], [-65.5, 17.5], [-65.5, 72.0], [175.0, 72.0], [175.0, 17.5]]]}"
-    },
-    {
-      "key": "spatial_uri",
-      "value": "http://sws.geonames.org/3114965"
-    },
-    {
-      "key": "spatial_centroid",
-      "value": "{\"type\": \"Point\", \"coordinates\": [50.0, 40.0]}"
-    },
-    {
-      "key": "temporal_end",
-      "value": "2021-06-25T15:01:07.173973"
-    },
-    {
-      "key": "temporal_start",
-      "value": "2021-05-25T15:01:07.173973"
-    },
-    {
-      "key": "theme",
-      "value": "[\"http://publications.europa.eu/resource/authority/data-theme/ECON\", \"http://publications.europa.eu/resource/authority/data-theme/EDUC\"]"
-    },
-    {
-      "key": "access_rights",
-      "value": "public"
-    },
-    {
-      "key": "conforms_to", 
-      "value": "[\"Standard 1\", \"Standard 2\"]"
-    },
-    {
-      "key": "documentation",
-      "value": "[\"http://page1\", \"http://page2\"]"
-    },
-    {
-      "key": "frequency",
-      "value": "http://purl.org/cld/freq/daily"
-    },
-    {
-      "key": "is_version_of",
-      "value": "[\"http://dataset1\", \"http://dataset2\"]"
-    },
-    {
-      "key": "has_version",
-      "value": "[\"http://dataset1\", \"http://dataset2\"]"
-    },
-    {
-      "key": "language",
-      "value": "[\"http://publications.europa.eu/resource/authority/language/SPA\", \"http://publications.europa.eu/resource/authority/language/GAL\"]"
-    },
-    {
-      "key": "alternate_identifier",
-      "value": "[\"alternate_identifier_1\", \"alternate_identifier_2\"]"
-    },
-    {
-      "key": "provenance",
-      "value": "provenance info"
-    },
-    {
-      "key": "issued",
-      "value": "2022-01-02T11:31:11.500592"
-    },
-    {
-      "key": "modified",
-      "value": "2022-01-03T11:31:11.500592"
-    },
-    {
-      "key": "version_notes",
-      "value": "2.0.1"
-    },
-    {
-      "key": "sample",
-      "value": "[\"http://Distribution1\", \"http://Distribution2\"]"
-    },
-    {
-      "key": "source",
-      "value": "[\"http://Dataset1\", \"http://Dataset2\"]"
-    },
-    {
-      "key": "dcat_type",
-      "value": "dataset"
-    }
+- Original profile (`euro_dcat_ap`): 
 
-  ],
-  "resources": [
-    {
-      "uri": "http://example_distribution",
-      "cache_last_updated": null,
-      "package_id": "cf3dcff7-34ae-4fab-a202-2f17e3153b2f",
-      "datastore_active": false,
-      "availability": "http://dcat-ap.de/def/plannedAvailability/stable",
-      "size": 200000000,
-      "download_url": "http://localhost/downloadURL",
-      "id": "9871734c-d261-4d66-96de-cfce6ddf8a31",
-      "state": "active",
-      "hash": "",
-      "description": "Example description of Example Resource",
-      "format": "JSON",
-      "mimetype_inner": null,
-      "url_type": null,
-      "revision_id": "22fcd3f6-17a0-49e5-a715-de493e9b3719",
-      "mimetype": "application/json",
-      "cache_url": null,
-      "name": "Example Resource",
-      "license": "http://publications.europa.eu/resource/authority/licence/CC_BY_4_0",
-      "license_type": "http://purl.org/adms/licencetype/PublicDomain",
-      "created": "2021-07-08T11:37:12.760031",
-      "url": "",
-      "last_modified": null,
-      "position": 0,
-      "access_url": "http://localhost/accessURL",
-      "resource_type": null,
-      "status": "http://purl.org/adms/status/Completed",
-      "conforms_to": "[\"Standard distribution 1\", \"Standard distribution 2\"]",
-      "issued": "2022-01-06T15:01:07.173973",
-      "modified": "2022-01-05T15:01:07.173973",
-      "language": "[\"http://publications.europa.eu/resource/authority/language/ENG\", \"http://publications.europa.eu/resource/authority/language/FRA\"]",
-      "rights": "Some statement about resource rights",
-      "documentation": "[\"http://pageDistribution1\", \"http://pageDistribution2\"]"
-    }
-  ]
-}
-```
+- DCAT-AP v2.0.1 (`euro_dcat_ap` `dcat_ap_2.0.1`): [ckan_dataset_edp_2_0_1.json](examples/ckan_dataset_edp_2_0_1.json)
 
-### Dataset (Package) and Distribution (Resource) DCAT-AP v2.0.1 rdf
 
-```xml
-<?xml version="1.0" encoding="utf-8"?>
-<rdf:RDF
-  xmlns:foaf="http://xmlns.com/foaf/0.1/"
-  xmlns:owl="http://www.w3.org/2002/07/owl#"
-  xmlns:dcatap="http://data.europa.eu/r5r/"
-  xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#"
-  xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
-  xmlns:dcat="http://www.w3.org/ns/dcat#"
-  xmlns:dct="http://purl.org/dc/terms/"
-  xmlns:skos="http://www.w3.org/2004/02/skos/core#"
-  xmlns:vcard="http://www.w3.org/2006/vcard/ns#"
-  xmlns:adms="http://www.w3.org/ns/adms#"
->
-  <dcat:Dataset rdf:about="http://example_dataset">
-    <dct:identifier>cf3dcff7-34ae-4fab-a202-2f17e3153b2f</dct:identifier>
-    <dcat:theme rdf:resource="http://publications.europa.eu/resource/authority/data-theme/EDUC"/>
-    <dcat:keyword>newTag2</dcat:keyword>
-    <dcat:contactPoint>
-      <vcard:Kind rdf:about="http://localhost/ContactUri">
-        <vcard:fn>MaintainerName ExampleSurname</vcard:fn>
-        <vcard:hasEmail rdf:resource="mailto:maintainer@email.com"/>
-      </vcard:Kind>
-    </dcat:contactPoint>
-    <dct:title>examplepackage</dct:title>
-    <dcat:keyword>newTag</dcat:keyword>
-    <dct:temporal>
-      <dct:PeriodOfTime rdf:nodeID="N3dd43139d1904f78b2643f9f6003d4da">
-        <dcat:startDate rdf:datatype="http://www.w3.org/2001/XMLSchema#dateTime">2021-05-25T15:01:07.173973</dcat:startDate>
-        <dcat:endDate rdf:datatype="http://www.w3.org/2001/XMLSchema#dateTime">2021-06-25T15:01:07.173973</dcat:endDate>
-      </dct:PeriodOfTime>
-    </dct:temporal>
-    <dcat:landingPage>
-      <foaf:Document rdf:about="http://localhost/landingpageExample.es"/>
-    </dcat:landingPage>
-    <dct:spatial>
-      <dct:Location rdf:about="http://sws.geonames.org/3114965">
-        <dcat:bbox rdf:datatype="http://www.opengis.net/ont/geosparql#wktLiteral">POLYGON ((175.0000 17.5000, -65.5000 17.5000, -65.5000 72.0000, 175.0000 72.0000, 175.0000 17.5000))</dcat:bbox>
-        <dcat:centroid rdf:datatype="http://www.opengis.net/ont/geosparql#wktLiteral">POINT (50.0000 40.0000)</dcat:centroid>
-        <skos:inScheme rdf:resource="http://sws.geonames.org"/>
-      </dct:Location>
-    </dct:spatial>
-    <dct:description>Description example of dataset test</dct:description>
-    <dcat:theme rdf:resource="http://publications.europa.eu/resource/authority/data-theme/ECON"/>
-    <dct:publisher>
-      <foaf:Agent rdf:about="http://publications.europa.eu/resource/authority/corporate-body/SPC">
-        <dct:type rdf:resource="http://purl.org/adms/publishertype/Academia-ScientificOrganisation"/>
-        <foaf:name>exampleorg</foaf:name>
-      </foaf:Agent>
-    </dct:publisher>
-    <owl:versionInfo>2.0</owl:versionInfo>
-    <dct:accessRights>
-      <dct:RightsStatement rdf:nodeID="N17e995e361144470975f58b61608f9f8">
-        <rdfs:label>public</rdfs:label>
-      </dct:RightsStatement>
-    </dct:accessRights>
-    <dct:conformsTo>
-      <dct:Standard rdf:nodeID="N9d1556258e894185afc7898b8dce9e38">
-        <rdfs:label>Standard 1</rdfs:label>
-      </dct:Standard>
-    </dct:conformsTo>
-    <dct:conformsTo>
-      <dct:Standard rdf:nodeID="N8473effd710341c899e147263f5201bd">
-        <rdfs:label>Standard 2</rdfs:label>
-      </dct:Standard>
-    </dct:conformsTo>
-    <foaf:page>
-      <foaf:Document rdf:about="http://page1"/>
-    </foaf:page>
-    <foaf:page>
-      <foaf:Document rdf:about="http://page2"/>
-    </foaf:page>
-    <dct:accrualPeriodicity rdf:resource="http://purl.org/cld/freq/daily"/>
-    <dct:isVersionOf rdf:resource="http://dataset1"/>
-    <dct:isVersionOf rdf:resource="http://dataset2"/>
-    <dct:hasVersion rdf:resource="http://dataset1"/>
-    <dct:hasVersion rdf:resource="http://dataset2"/>
-    <dct:language rdf:resource="http://publications.europa.eu/resource/authority/language/SPA"/>
-    <dct:language rdf:resource="http://publications.europa.eu/resource/authority/language/GAL"/>
-    <adms:identifier>
-      <adms:Identifier rdf:nodeID="N7e41687e3b53467c95ba9422fc3e0d5f">
-        <skos:notation>alternate_identifier_1</skos:notation>
-      </adms:Identifier>
-    </adms:identifier>
-    <adms:identifier>
-      <adms:Identifier rdf:nodeID="N2b5fdfa749c648bb9cc68f03fa157669">
-        <skos:notation>alternate_identifier_2</skos:notation>
-      </adms:Identifier>
-    </adms:identifier>
-    <dct:provenance>
-      <dct:ProvenanceStatement rdf:nodeID="Nfa10a2292d6c4afaa33fa1956f527e42">
-        <rdfs:label>provenance info</rdfs:label>
-      </dct:ProvenanceStatement>
-    </dct:provenance>
-    <dct:issued rdf:datatype="http://www.w3.org/2001/XMLSchema#dateTime">2022-01-02T11:31:11.500592</dct:issued>
-    <dct:modified rdf:datatype="http://www.w3.org/2001/XMLSchema#dateTime">2022-01-03T11:31:11.500592</dct:modified>
-    <adms:versionNotes>2.0.1</adms:versionNotes>
-    <adms:sample rdf:resource="http://Distribution1"/>
-    <adms:sample rdf:resource="http://Distribution2"/>
-    <dct:source rdf:resource="http://Dataset1"/>
-    <dct:source rdf:resource="http://Dataset2"/>
-    <dct:type>
-      <skos:Concept rdf:nodeID="N98d6b58b2ff040a0a9656319d55f5cf9">
-        <skos:prefLabel>dataset</skos:prefLabel>
-      </skos:Concept>
-    </dct:type>
-        <dcat:distribution>
-    <dcat:Distribution rdf:about="http://example_distribution">
-      <dct:title>Example Resource</dct:title>
-      <dcat:accessURL rdf:resource="http://localhost/accessURL"/>
-      <dct:format rdf:resource="http://publications.europa.eu/resource/authority/file-type/JSON"/>
-      <dct:description>Example description of Example Resource</dct:description>
-      <dcat:mediaType rdf:resource="https://www.iana.org/assignments/media-types/application/json"/>
-      <dcat:downloadURL rdf:resource="http://localhost/downloadURL"/>
-      <dct:license rdf:resource="http://publications.europa.eu/resource/authority/licence/CC_BY_4_0"/>
-      <dcat:byteSize rdf:datatype="http://www.w3.org/2001/XMLSchema#decimal">200000000.0</dcat:byteSize>
-      <dcatap:availability rdf:resource="http://dcat-ap.de/def/plannedAvailability/stable"/>
-      <adms:status rdf:resource="http://purl.org/adms/status/Completed"/>
-      <dct:conformsTo>
-        <dct:Standard rdf:nodeID="Nc765b218145049b08a5fef3e384393d4">
-          <rdfs:label>Standard distribution 1</rdfs:label>
-        </dct:Standard>
-      </dct:conformsTo>
-      <dct:conformsTo>
-        <dct:Standard rdf:nodeID="Nc765b218145049b08a5fef3e384393d2">
-          <rdfs:label>Standard distribution 2</rdfs:label>
-        </dct:Standard>
-      </dct:conformsTo>,
-      <dct:modified rdf:datatype="http://www.w3.org/2001/XMLSchema#dateTime">2022-01-05T15:01:07.173973</dct:modified>
-      <dct:issued rdf:datatype="http://www.w3.org/2001/XMLSchema#dateTime">2022-01-06T15:01:07.173973</dct:issued>
-      <dct:language rdf:resource="http://publications.europa.eu/resource/authority/language/ENG"/>
-      <dct:language rdf:resource="http://publications.europa.eu/resource/authority/language/FRA"/>
-      <dct:rights>
-        <dct:RightsStatement rdf:nodeID="Neaf6c525097e4b2cbdb974f615437e28">
-          <rdfs:label>Some statement about resource rights</rdfs:label>
-        </dct:RightsStatement>
-      </dct:rights>
-      <foaf:page>
-        <foaf:Document rdf:about="http://pageDistribution1"/>
-      </foaf:page>
-      <foaf:page>
-        <foaf:Document rdf:about="http://pageDistribution2"/>
-      </foaf:page>
-    </dcat:Distribution>
-  </dcat:distribution>
-  </dcat:Dataset>
-  <dct:MediaType rdf:about="https://www.iana.org/assignments/media-types/application/json"/>
-  <dct:MediaTypeOrExtent rdf:about="http://publications.europa.eu/resource/authority/file-type/JSON"/>
-  <dct:LicenseDocument rdf:about="http://publications.europa.eu/resource/authority/licence/CC_BY_4_0">
-    <dct:type rdf:resource="http://purl.org/adms/licencetype/PublicDomain"/>
-  </dct:LicenseDocument>
-</rdf:RDF>
-```
+### Dataset (Package) and Distribution (Resource) DCAT-AP rdf
+- Original profile (`euro_dcat_ap`): [ckan_dataset_edp_original.rdf](examples/ckan_dataset_edp_original.rdf)
+
+- DCAT-AP v2.0.1 (`euro_dcat_ap` `dcat_ap_2.0.1`): [ckan_dataset_edp_2_0_1.rdf](examples/ckan_dataset_edp_2_0_1.rdf)
+
 
 ### Catalogue (Organization) CKAN metadata
 

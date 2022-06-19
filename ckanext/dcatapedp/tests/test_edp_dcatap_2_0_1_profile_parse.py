@@ -130,11 +130,15 @@ class TestEDPDCATAPProfileSerializeDataset(BaseParseTest):
 
         organization_ref = URIRef(
             'http://publications.europa.eu/resource/authority/corporate-body/SPC')
-
+        organization_type = URIRef(
+            'http://purl.org/adms/publishertype/Academia-ScientificOrganisation')
+            
         g, dataset_ref = self._get_base_graph()
 
         g.add((dataset_ref, DCT['publisher'], organization_ref))
-        g.add((organization_ref, RDF.type, FOAF.Agent))
+        g.add((organization_ref, RDF['type'], FOAF.Agent))
+        g.add((organization_ref, DCT['type'], organization_type))
+        g.add((organization_type, RDF['type'], SKOS['Concept']))
 
         p = RDFParser(profiles=['euro_dcat_ap', 'dcat_ap_2.0.1'])
         p.g = g
@@ -143,25 +147,8 @@ class TestEDPDCATAPProfileSerializeDataset(BaseParseTest):
         extras = self._extras(dataset)
 
         assert extras['publisher_uri'] == str(organization_ref)
+        assert extras['publisher_type'] == str(organization_type)
 
-    def test_publisher_not_UE_CORPORATE_BODY(self):
-
-        organization_ref = URIRef('http://example_organization')
-
-        g, dataset_ref = self._get_base_graph()
-
-        g.add((dataset_ref, DCT['publisher'], organization_ref))
-        g.add((organization_ref, RDF.type, FOAF.Agent))
-        schema = URIRef(EU_CORPORATE_BODY_SCHEMA_URI)
-        g.add((organization_ref, SKOS.inScheme, schema))
-
-        p = RDFParser(profiles=['euro_dcat_ap', 'dcat_ap_2.0.1'])
-        p.g = g
-
-        dataset = [d for d in p.datasets()][0]
-        extras = self._extras(dataset)
-
-        assert extras['publisher_uri'] == str(organization_ref)
 
     def test_contact_point(self):
 
@@ -264,9 +251,108 @@ class TestEDPDCATAPProfileSerializeDataset(BaseParseTest):
         dataset = [d for d in p.datasets()][0]
         extras = self._extras(dataset)
 
+        assert len(json.loads(extras['conforms_to'])) == 2
         assert sorted(json.loads(extras['conforms_to'])) == conforms_to_list
 
-    # page, documentation: tested in euro_dcat_ap profile
+    def test_page_documentation(self):
+        page_refs = '[\"http://page1\", \"http://page2\"]'
+        page_identifier_list = json.loads(page_refs)
+
+        g, dataset_ref = self._get_base_graph()
+
+        for page_ref in page_identifier_list:
+            page_ref = URIRef(page_ref)
+            g.add((dataset_ref, FOAF['page'], page_ref))
+            g.add((page_ref, RDF.type, FOAF['Document']))
+
+        p = RDFParser(profiles=['euro_dcat_ap', 'dcat_ap_2.0.1'])
+        p.g = g
+
+        dataset = [d for d in p.datasets()][0]
+        extras = self._extras(dataset)
+
+        assert len(json.loads(extras['documentation'])) == 2
+        assert sorted(json.loads(extras['documentation'])) == page_identifier_list
+
+
+    def test_language(self):
+        language_refs = '[\"http://publications.europa.eu/resource/authority/language/ENG", \"http://publications.europa.eu/resource/authority/language/FRA"]'
+        language_identifier_list = json.loads(language_refs)
+
+        g, dataset_ref = self._get_base_graph()
+
+        for language_ref in language_identifier_list:
+            language_ref = URIRef(language_ref)
+            g.add((dataset_ref, DCT['language'], language_ref))
+            g.add((language_ref, RDF.type, DCT['LinguisticSystem']))
+
+        p = RDFParser(profiles=['euro_dcat_ap', 'dcat_ap_2.0.1'])
+        p.g = g
+
+        dataset = [d for d in p.datasets()][0]
+        extras = self._extras(dataset)
+
+        assert len(json.loads(extras['language'])) == 2
+        assert sorted(json.loads(extras['language'])) == language_identifier_list
+
+    def test_theme(self):
+        theme_refs = '[\"http://publications.europa.eu/resource/authority/data-theme/EDUC", \"http://publications.europa.eu/resource/authority/data-theme/TECH"]'
+        theme_identifier_list = json.loads(theme_refs)
+
+        g, dataset_ref = self._get_base_graph()
+
+        for theme_ref in theme_identifier_list:
+            theme_ref = URIRef(theme_ref)
+            g.add((dataset_ref, DCAT['theme'], theme_ref))
+            g.add((theme_ref, RDF.type, SKOS['Concept']))
+
+        p = RDFParser(profiles=['euro_dcat_ap', 'dcat_ap_2.0.1'])
+        p.g = g
+
+        dataset = [d for d in p.datasets()][0]
+        extras = self._extras(dataset)
+
+        assert len(json.loads(extras['theme'])) == 2
+        assert sorted(json.loads(extras['theme'])) == theme_identifier_list
+
+
+    def test_dependent_dataset_distribution(self):
+        # test dct:isVersion dct:hasVersion dct:source adms:sample 
+        dataset_refs = '[\"http://dataset1\", \"http://dataset2\"]'
+        dataset_identifier_list = json.loads(dataset_refs)
+        distribution_refs = '[\"http://distribution1\", \"http://distribution2\"]'
+        distribution_identifier_list = json.loads(distribution_refs)
+
+        test_itmes = [
+            (DCT['isVersionOf'], 'is_version_of', DCAT['Dataset'], dataset_identifier_list),
+            (DCT['hasVersion'], 'has_version', DCAT['Dataset'], dataset_identifier_list),
+            (DCT['source'], 'source', DCAT['Dataset'], dataset_identifier_list),
+            (ADMS['sample'], 'sample', DCAT['Distribution'], distribution_identifier_list)
+        ] 
+
+        g, dataset_ref = self._get_base_graph()
+
+        for dcat_object, dataset_dict_prop, rdf_type, values in test_itmes:
+            for value_ref in values:
+                value_ref = URIRef(value_ref)
+                g.add((dataset_ref, dcat_object, value_ref))
+                g.add((value_ref, RDF.type, rdf_type))
+    
+        p = RDFParser(profiles=['euro_dcat_ap', 'dcat_ap_2.0.1'])
+        p.g = g
+        datasets = [d for d in p.datasets()]
+        # There hare 3 Dataset type: 2 dataset_refs, the main dataset
+        assert len(datasets) == len(dataset_identifier_list) + 1
+        extraPropsFoundInDictionary = 0
+        for dataset in datasets:
+            extras = self._extras(dataset)
+            for _, dataset_dict_prop, _, values in test_itmes: 
+                if dataset_dict_prop in extras:
+                    assert len(json.loads(extras[dataset_dict_prop])) == len(values)
+                    assert sorted(json.loads(extras[dataset_dict_prop])) == values
+                    extraPropsFoundInDictionary += 1
+        assert extraPropsFoundInDictionary == len(test_itmes)
+
 
     def test_adms_identifier(self):
         adms_identifier = '[\"alternate_identifier_0\", \"alternate_identifier_1\"]'
@@ -332,6 +418,23 @@ class TestEDPDCATAPProfileSerializeDataset(BaseParseTest):
 
         assert extras['dcat_type'] == str(dct_type)        
 
+    def test_accrual_periodicity(self):
+
+        accrual_periodicity_ref = URIRef('http://purl.org/cld/freq/daily')
+
+        g, dataset_ref = self._get_base_graph()
+
+        g.add((dataset_ref, DCT['accrualPeriodicity'], accrual_periodicity_ref))
+        g.add((accrual_periodicity_ref, RDF.type, DCT['Frequency']))
+
+        p = RDFParser(profiles=['euro_dcat_ap', 'dcat_ap_2.0.1'])
+        p.g = g
+
+        dataset = [d for d in p.datasets()][0]
+
+        extras = self._extras(dataset)
+        assert extras['frequency'] == str(accrual_periodicity_ref)
+ 
 
     # Resources
     def test_graph_from_resource(self):
@@ -453,89 +556,6 @@ class TestEDPDCATAPProfileSerializeDataset(BaseParseTest):
             assert resource['format'] == resource_format
             assert resource['mimetype'] == resource_mimetype
 
-    def test_distribution_license(self):
-
-        license_ref = URIRef(
-            'http://publications.europa.eu/resource/authority/licence/CC_BY_4_0')
-        license_type = URIRef('http://purl.org/adms/licencetype/PublicDomain')
-
-        g, dataset_ref, distribution_ref = self._get_base_graph_with_resource()
-
-        g.add((distribution_ref, DCT['license'], license_ref))
-        g.add((license_ref, RDF['type'], DCT['LicenseDocument']))
-        g.add(((license_ref, DCT['type'], license_type)))
-
-        p = RDFParser(profiles=['euro_dcat_ap', 'dcat_ap_2.0.1'])
-        p.g = g
-
-        dataset = [d for d in p.datasets()][0]
-        resource = dataset.get('resources')[0]
-
-        assert resource['license'] == str(license_ref)
-        assert resource['license_type'] == str(license_type)
-
-    def test_distribution_license_literal(self):
-
-        license_name = 'CC_BY_4_0'
-        license_type = 'PublicDomain'
-
-        g, dataset_ref, distribution_ref = self._get_base_graph_with_resource()
-
-        license_ref = BNode()
-
-        g.add((distribution_ref, DCT['license'], license_ref))
-        g.add((license_ref, RDF['type'], DCT['LicenseDocument']))
-        g.add(((license_ref, DCT['title'], Literal(license_name))))
-        g.add(((license_ref, DCT['type'], Literal(license_type))))
-
-        p = RDFParser(profiles=['euro_dcat_ap', 'dcat_ap_2.0.1'])
-        p.g = g
-
-        dataset = [d for d in p.datasets()][0]
-        resource = dataset.get('resources')[0]
-
-        assert resource['license'] == license_name
-        assert resource['license_type'] == license_type
-
-    def test_distribution_license_only(self):
-
-        license_ref = URIRef(
-            'http://publications.europa.eu/resource/authority/licence/CC_BY_4_0')
-
-        g, dataset_ref, distribution_ref = self._get_base_graph_with_resource()
-
-        g.add((distribution_ref, DCT['license'], license_ref))
-        g.add((license_ref, RDF['type'], DCT['LicenseDocument']))
-
-        p = RDFParser(profiles=['euro_dcat_ap', 'dcat_ap_2.0.1'])
-        p.g = g
-
-        dataset = [d for d in p.datasets()][0]
-        resource = dataset.get('resources')[0]
-
-        assert resource['license'] == str(license_ref)
-        assert not 'license_type' in resource
-
-    def test_distribution_license_type_only(self):
-
-        license_ref = BNode()
-        license_type = URIRef('http://purl.org/adms/licencetype/PublicDomain')
-
-        g, dataset_ref, distribution_ref = self._get_base_graph_with_resource()
-
-        g.add((distribution_ref, DCT['license'], license_ref))
-        g.add((license_ref, RDF['type'], DCT['LicenseDocument']))
-        g.add(((license_ref, DCT['type'], license_type)))
-
-        p = RDFParser(profiles=['euro_dcat_ap', 'dcat_ap_2.0.1'])
-        p.g = g
-
-        dataset = [d for d in p.datasets()][0]
-        resource = dataset.get('resources')[0]
-
-        assert not 'license' in resource
-        assert resource['license_type'] == str(license_type)
-
     def test_distribution_availability(self):
 
         availability = URIRef(
@@ -596,7 +616,80 @@ class TestEDPDCATAPProfileSerializeDataset(BaseParseTest):
         assert sorted(json.loads(resource['conforms_to'])) == conforms_to_list
     
     # rights: tested in euro_dcat_ap profile
-    # page, documentation: tested in euro_dcat_ap profile
+
+    def test_distribution_page_documentation(self):
+        page_refs = '[\"http://pageDistribution1\", \"http://pageDistribution2\"]'
+        page_identifier_list = json.loads(page_refs)
+
+        g, dataset_ref, distribution_ref = self._get_base_graph_with_resource()
+
+        for page_ref in page_identifier_list:
+            page_ref = URIRef(page_ref)
+            g.add((distribution_ref, FOAF['page'], page_ref))
+            g.add((page_ref, RDF.type, FOAF['Document']))
+
+        p = RDFParser(profiles=['euro_dcat_ap', 'dcat_ap_2.0.1'])
+        p.g = g
+
+        dataset = [d for d in p.datasets()][0]
+        resource = dataset.get('resources')[0]
+
+        assert len(json.loads(resource['documentation'])) == 2
+        assert sorted(json.loads(resource['documentation'])) == page_identifier_list
+
+    def test_distribution_language(self):
+        language_refs = '[\"http://publications.europa.eu/resource/authority/language/ENG", \"http://publications.europa.eu/resource/authority/language/FRA"]'
+        language_identifier_list = json.loads(language_refs)
+
+        g, dataset_ref, distribution_ref = self._get_base_graph_with_resource()
+
+        for language_ref in language_identifier_list:
+            language_ref = URIRef(language_ref)
+            g.add((distribution_ref, DCT['language'], language_ref))
+            g.add((language_ref, RDF.type, DCT['LinguisticSystem']))
+
+        p = RDFParser(profiles=['euro_dcat_ap', 'dcat_ap_2.0.1'])
+        p.g = g
+
+        dataset = [d for d in p.datasets()][0]
+        resource = dataset.get('resources')[0]
+
+        assert len(json.loads(resource['language'])) == 2
+        assert sorted(json.loads(resource['language'])) == language_identifier_list
+
+    def test_distribution_status(self):
+        status = "http://purl.org/adms/status/Completed"
+
+        g, dataset_ref, distribution_ref = self._get_base_graph_with_resource()
+
+        status_ref = URIRef(status)
+        g.add((distribution_ref, ADMS['status'], status_ref))
+        g.add((status_ref, RDF.type, SKOS['Concept']))
+
+        p = RDFParser(profiles=['euro_dcat_ap', 'dcat_ap_2.0.1'])
+        p.g = g
+
+        dataset = [d for d in p.datasets()][0]
+        resource = dataset.get('resources')[0]
+
+        assert resource['status'] == status
+
+    def test_distribution_license(self):
+        license = "http://publications.europa.eu/resource/authority/licence/CC_BY_4_0"
+
+        g, dataset_ref, distribution_ref = self._get_base_graph_with_resource()
+
+        license_ref = URIRef(license)
+        g.add((distribution_ref, DCT['license'], license_ref))
+        g.add((license_ref, RDF.type, DCT['LicenseDocument']))
+
+        p = RDFParser(profiles=['euro_dcat_ap', 'dcat_ap_2.0.1'])
+        p.g = g
+
+        dataset = [d for d in p.datasets()][0]
+        resource = dataset.get('resources')[0]
+
+        assert resource['license'] == license
 
 # class TestEDPDCATAPProfileSerializeCatalog(BaseSerializeTest):
 #     pass

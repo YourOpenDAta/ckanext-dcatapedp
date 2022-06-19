@@ -25,7 +25,7 @@ class DCATAPProfile_2_0_1(DCATAPProfile_2):
 
     def parse_dataset(self, dataset_dict, dataset_ref):
         # Temporal
-        start, end = self._time_interval_edp(dataset_ref, DCT.temporal)
+        start, end = self.time_interval_edp(dataset_ref, DCT.temporal)
         if start:
             dataset_dict['extras'].append(
                 {'key': 'temporal_start', 'value': start})
@@ -34,7 +34,7 @@ class DCATAPProfile_2_0_1(DCATAPProfile_2):
                 {'key': 'temporal_end', 'value': end})
 
         # Spatial
-        geom, centr = self._spatial_edp(dataset_ref, DCT.spatial)
+        geom, centr = self.spatial_edp(dataset_ref, DCT.spatial)
         if geom:
             dataset_dict['extras'].append(
                 {'key': 'spatial', 'value': geom})
@@ -45,12 +45,14 @@ class DCATAPProfile_2_0_1(DCATAPProfile_2):
         # accessRights: in euro_dcat_ap profile
 
         # conformsTo
-        conformsToList = self._conforms_to_edp(dataset_ref)
+        conformsToList = self.conforms_to_edp(dataset_ref)
         if conformsToList:
             add_or_replace_from_extra(
                     dataset_dict, 'conforms_to', conformsToList)
 
         # page, documentation: in euro_dcat_ap profile
+        
+        # isVersionOf, hasVersion: in euro_dcat_ap profile
 
         # adms identifier
         adms_identifier_list = []
@@ -79,6 +81,13 @@ class DCATAPProfile_2_0_1(DCATAPProfile_2):
               add_or_replace_from_extra(
                     dataset_dict, 'dcat_type', str(dct_type))
 
+        # publisher: in euro_dcat_ap profile
+        # accrualPeriodicity: in euro_dcat_ap profile
+
+        # language: in euro_dcat_ap profile
+
+        # theme in euro_dcat_ap profile
+
         # Resources
         for resource_dict in dataset_dict.get('resources', []):
             resource_uri = resource_dict['uri']
@@ -89,7 +98,7 @@ class DCATAPProfile_2_0_1(DCATAPProfile_2):
             # Format
             normalize_ckan_format = toolkit.asbool(config.get(
                 'ckanext.dcat.normalize_ckan_format', True))
-            imt, label = self._distribution_format_edp(
+            imt, label = self.distribution_format_edp(
                 distribution, normalize_ckan_format)
 
             if imt:
@@ -100,20 +109,6 @@ class DCATAPProfile_2_0_1(DCATAPProfile_2):
             elif imt:
                 resource_dict['format'] = imt
 
-            # License
-            license, license_type = self._distribution_license_edp(
-                distribution, DCT.license)
-
-            if not license:
-                try:
-                    resource_dict.pop('license')
-                except:
-                    pass
-            else:
-                resource_dict['license'] = license
-            if license_type:
-                resource_dict['license_type'] = license_type
-
             # Availability
             availability = self._object_value(
                 distribution, DCATAP.availability)
@@ -121,12 +116,20 @@ class DCATAPProfile_2_0_1(DCATAPProfile_2):
                 resource_dict['availability'] = availability
 
             # conformsTo
-            conformsToList = self._conforms_to_edp(distribution)
+            conformsToList = self.conforms_to_edp(distribution)
             if conformsToList:
                 resource_dict['conforms_to'] = conformsToList
 
             # rights: in euro_dcat_ap profile
             # page, documentation: in euro_dcat_ap profile
+
+            # language: in euro_dcat_ap profile
+
+            # adms:status in euro_dcat_ap profile
+
+            # dct:license in euro_dcat_ap profile
+
+
 
         return dataset_dict
 
@@ -140,19 +143,14 @@ class DCATAPProfile_2_0_1(DCATAPProfile_2):
         # g.add((dataset_ref, DCT.type, DCT_TYPE.Dataset))
 
         # Landing page
-        landing_page = dataset_dict.get('url')
-        if landing_page:
-            landing_page_ref = URIRefOrLiteral(landing_page)
-            g.add((landing_page_ref, RDF.type, FOAF.Document))
+        self.add_rdf_type(dataset_ref, DCAT['landingPage'], FOAF['Document'])
 
         # Publisher: Generalize type from FOAF.Organization to FOAF.Agent
+        # add skos:Concept type to foaf:Agent dct:type 
         organization_ref = g.value(dataset_ref, DCT.publisher)
         if organization_ref:
             g.set((organization_ref, RDF.type, FOAF.Agent))
-            if not EU_CORPORATE_BODY_SCHEMA_URI in organization_ref:
-                # TODO Just to pass the validator but it is a mistake to put it.
-                schema = URIRef(EU_CORPORATE_BODY_SCHEMA_URI)
-                g.add((organization_ref, SKOS.inScheme, schema))
+            self.add_rdf_type(organization_ref, DCT['type'], SKOS['Concept'])
 
         # Contact details: Generalize type from VCARD.Organization to VCARD.contactPoint
         contact_point_ref = g.value(dataset_ref, DCAT.contactPoint)
@@ -210,13 +208,13 @@ class DCATAPProfile_2_0_1(DCATAPProfile_2):
                     pass
 
         # accessRights: change range to dct:RightsStatement
-        self._generate_rights_to_graph(dataset_ref, DCT.accessRights)
+        self.generate_rights_to_graph(dataset_ref, DCT.accessRights)
 
         #conformsTo: change range to dct:Standard
-        self._generate_conforms_to_graph(dataset_ref)
+        self.generate_conforms_to_graph(dataset_ref)
 
-        # page change range to foaf:document
-        self._generate_page_to_graph(dataset_ref)
+        # page change range to foaf:Document
+        self.add_rdf_type(dataset_ref, FOAF['page'], FOAF['Document'])
 
         # adms identifier: change range to ADMS.Identifier
         for _, _, adms_identifier in g.triples((dataset_ref, ADMS.identifier, None)):
@@ -235,15 +233,11 @@ class DCATAPProfile_2_0_1(DCATAPProfile_2):
             g.add((provenance_ref, RDFS.label, Literal(provenance)))
             g.add((dataset_ref, DCT.provenance, provenance_ref))
         
-        # sample: change range to UriRef or Literal not only literal
-        for _, _, sample in g.triples((dataset_ref, ADMS.sample, None)):
-            g.remove((dataset_ref, ADMS.sample, sample))
-            g.add((dataset_ref, ADMS.sample, URIRefOrLiteral(sample)))
+        # sample: change range to dcat:Dataset
+        self.generate_dependent_distribution_to_graph(dataset_ref, ADMS['sample'])
 
-        # source: change range to UriRef or Literal not only literal
-        for _, _, source in g.triples((dataset_ref, DCT.source, None)):
-            g.remove((dataset_ref, DCT.source, source))
-            g.add((dataset_ref, DCT.source, URIRefOrLiteral(source)))
+        # source change range to dcat:Dataset
+        self.generate_dependent_datasets_to_graph(dataset_ref, DCT['source'])
 
         # type: change range to skos:concept
         dct_type = g.value(dataset_ref, DCT['type'])
@@ -253,6 +247,23 @@ class DCATAPProfile_2_0_1(DCATAPProfile_2):
             g.add((dct_type_ref, RDF.type, SKOS.Concept))
             g.add((dct_type_ref, SKOS.prefLabel, Literal(dct_type)))
             g.add((dataset_ref, DCT['type'], dct_type_ref))
+
+        # dct:isVersionOf change range to dcat:Dataset
+        self.generate_dependent_datasets_to_graph(dataset_ref, DCT['isVersionOf'])
+
+        # dct:hasVersion change range to dcat:Dataset
+        self.generate_dependent_datasets_to_graph(dataset_ref, DCT['hasVersion'])
+
+        # dct:accrualPeriodicity range to dct:Frequency
+        self.add_rdf_type(dataset_ref, DCT['accrualPeriodicity'], DCT['Frequency'])
+
+        # dct:language change range to dct:LinguisticSystem
+        self.add_rdf_type(dataset_ref, DCT['language'], DCT['LinguisticSystem'])
+
+        # dct:theme change range to skos:Concept
+        self.add_rdf_type(dataset_ref, DCAT['theme'], SKOS['Concept'])
+
+
 
         # Resource
         for resource_dict in dataset_dict.get('resources', []):
@@ -304,28 +315,6 @@ class DCATAPProfile_2_0_1(DCATAPProfile_2):
                     g.add((distribution, DCT['format'],
                            fmt_ref))
 
-            # License
-            # DCT.LicenseDocument as RDF.type
-            # Add DCT.type as license type
-            # If license is a Literal, serialize as BNode and DCT.title,
-            license = self._get_resource_value(resource_dict, 'license')
-            license_type = self._get_resource_value(
-                resource_dict, 'license_type')
-            g.remove((distribution, DCT.license, None))
-            if license or license_type:
-                if not license:
-                    license_ref = BNode()
-                else:
-                    license = URIRefOrLiteral(license)
-                    if isinstance(license, Literal):
-                        license_ref = BNode()
-                        g.add((license_ref, DCT.title, license))
-                    else:
-                        license_ref = license
-                if license_type:
-                    g.add((license_ref, DCT.type, URIRefOrLiteral(license_type)))
-                g.add((license_ref, RDF.type, DCT.LicenseDocument))
-                g.add((distribution, DCT.license, license_ref))
 
             # Availability
             availability = resource_dict.get('availability')
@@ -334,13 +323,22 @@ class DCATAPProfile_2_0_1(DCATAPProfile_2):
                        URIRefOrLiteral(availability)))
 
             # conformsTo: change range to dct:Standard
-            self._generate_conforms_to_graph(distribution)
+            self.generate_conforms_to_graph(distribution)
 
             # rights: change range to dct:RightsStatement
-            self._generate_rights_to_graph(distribution, DCT.rights)
+            self.generate_rights_to_graph(distribution, DCT.rights)
 
-            # page change range to foaf:document
-            self._generate_page_to_graph(distribution)
+            # page change range to foaf:Document
+            self.add_rdf_type(distribution, FOAF['page'], FOAF['Document'])
+
+            # dct:language change range to dct:LinguisticSystem
+            self.add_rdf_type(distribution, DCT['language'], DCT['LinguisticSystem'])
+
+            # adms:status change range to skos:Concept
+            self.add_rdf_type(distribution, ADMS['status'], SKOS['Concept']) 
+
+            # dct:license change range to dct:LicenseDocument
+            self.add_rdf_type(distribution, DCT['license'], DCT['LicenseDocument'])           
 
     def graph_from_catalog(self, catalog_dict, catalog_ref):
 
