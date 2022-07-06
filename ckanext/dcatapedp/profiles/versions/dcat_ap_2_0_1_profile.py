@@ -3,7 +3,7 @@ from builtins import str
 
 from ckan.plugins import toolkit
 from ckanext.dcat.profiles import URIRefOrLiteral
-from ckanext.dcatapedp.profiles.controlled_vocabularies import *
+from ckanext.dcatapedp.profiles.controlled_vocabularies.links import *
 from ckanext.dcatapedp.profiles.versions.dcat_ap_2_profile import DCATAPProfile_2
 from ckanext.dcatapedp.profiles.namespaces import *
 from ckanext.dcatapedp.profiles.utils import (
@@ -208,7 +208,7 @@ class DCATAPProfile_2_0_1(DCATAPProfile_2):
                     pass
 
         # accessRights: change range to dct:RightsStatement
-        self.generate_rights_to_graph(dataset_ref, DCT.accessRights)
+        self.add_rdf_type(dataset_ref, DCT['accessRights'], DCT['RightsStatement'])
 
         #conformsTo: change range to dct:Standard
         self.generate_conforms_to_graph(dataset_ref)
@@ -326,7 +326,7 @@ class DCATAPProfile_2_0_1(DCATAPProfile_2):
             self.generate_conforms_to_graph(distribution)
 
             # rights: change range to dct:RightsStatement
-            self.generate_rights_to_graph(distribution, DCT.rights)
+            self.add_rdf_type(distribution, DCT['rights'], DCT['RightsStatement'])
 
             # page change range to foaf:Document
             self.add_rdf_type(distribution, FOAF['page'], FOAF['Document'])

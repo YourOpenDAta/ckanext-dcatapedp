@@ -55,9 +55,7 @@
     </dct:publisher>
     <owl:versionInfo>2.0</owl:versionInfo>
     <dct:accessRights>
-      <dct:RightsStatement rdf:nodeID="N17e995e361144470975f58b61608f9f8">
-        <rdfs:label>public</rdfs:label>
-      </dct:RightsStatement>
+      <dct:RightsStatement rdf:about="http://publications.europa.eu/resource/authority/access-right/RESTRICTED"/>
     </dct:accessRights>
     <dct:conformsTo>
       <dct:Standard rdf:nodeID="N9d1556258e894185afc7898b8dce9e38">
@@ -166,9 +164,7 @@
         <dct:LinguisticSystem rdf:about="http://publications.europa.eu/resource/authority/language/GAL"/>
       </dct:language>
       <dct:rights>
-        <dct:RightsStatement rdf:nodeID="Neaf6c525097e4b2cbdb974f615437e28">
-          <rdfs:label>Some statement about resource rights</rdfs:label>
-        </dct:RightsStatement>
+        <dct:RightsStatement rdf:about="http://publications.europa.eu/resource/authority/access-right/RESTRICTED"/>
       </dct:rights>
       <foaf:page>
         <foaf:Document rdf:about="http://pageDistribution1"/>

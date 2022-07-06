@@ -14,7 +14,7 @@ from ckanext.dcat import utils
 from ckanext.dcat.processors import RDFSerializer
 
 from ckanext.dcatapedp.profiles.namespaces import *
-from ckanext.dcatapedp.profiles.controlled_vocabularies import *
+from ckanext.dcatapedp.profiles.controlled_vocabularies.links import *
 
 
 class BaseSerializeTest(object):
@@ -287,7 +287,7 @@ class TestEDPDCATAPProfileSerializeDataset(BaseSerializeTest):
         dataset['extras'].extend([
             {
                 'key': 'access_rights',
-                'value': 'public'
+                'value': 'http://publications.europa.eu/resource/authority/access-right/RESTRICTED'
             }
         ])
         extras = self._extras(dataset)
@@ -297,12 +297,10 @@ class TestEDPDCATAPProfileSerializeDataset(BaseSerializeTest):
         dataset_ref = s.graph_from_dataset(dataset)
 
 
-        access_rights = self._triple(g, dataset_ref, DCT.accessRights, None)[2]
-
-        assert isinstance(access_rights, BNode)
-        right_label = self._triple(g, access_rights, RDFS.label, None)[2]
-        assert self._triple(g, access_rights, RDF.type, DCT.RightsStatement)
-        assert str(right_label) == extras['access_rights']
+        access_rights = self._triple(g, dataset_ref, DCT['accessRights'], None)[2]
+        assert access_rights
+        assert self._triple(g, access_rights, RDF['type'], DCT['RightsStatement'])
+        assert str(access_rights) == extras['access_rights']
 
     def test_conforms_to(self):
         dataset = self._get_base_dataset()
@@ -737,7 +735,7 @@ class TestEDPDCATAPProfileSerializeDataset(BaseSerializeTest):
     def test_distribution_rights(self):
         
         dataset, resource = self._get_base_dataset_and_resource()
-        resource['rights'] = 'Some statement about resource rights'
+        resource['rights'] = 'http://publications.europa.eu/resource/authority/access-right/RESTRICTED'
 
         s = RDFSerializer(profiles=['euro_dcat_ap', 'dcat_ap_2.0.1'])
         g = s.g
@@ -745,13 +743,9 @@ class TestEDPDCATAPProfileSerializeDataset(BaseSerializeTest):
         distribution = self._triple(g, dataset_ref, DCAT.distribution, None)[2]
         assert str(distribution) == utils.resource_uri(resource)
 
-
         rights = self._triple(g, distribution, DCT.rights, None)[2]
-
-        assert isinstance(rights, BNode)
-        right_label = self._triple(g, rights, RDFS.label, None)[2]
         assert self._triple(g, rights, RDF.type, DCT.RightsStatement)
-        assert str(right_label) == resource['rights']
+        assert str(rights) == resource['rights']
 
     def test_distribution_page(self):
         dataset, resource = self._get_base_dataset_and_resource()

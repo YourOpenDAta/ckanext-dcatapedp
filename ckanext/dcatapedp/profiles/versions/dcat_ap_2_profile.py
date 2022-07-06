@@ -3,7 +3,7 @@ from builtins import str
 
 from ckan.plugins import toolkit
 from ckanext.dcat.profiles import RDFProfile, URIRefOrLiteral
-from ckanext.dcatapedp.profiles.controlled_vocabularies import *
+from ckanext.dcatapedp.profiles.controlled_vocabularies.links import *
 from ckanext.dcatapedp.profiles.namespaces import *
 from ckanext.dcatapedp.profiles.utils import (
     unified_resource_format_ckan)
@@ -130,14 +130,4 @@ class DCATAPProfile_2(RDFProfile):
         self.add_rdf_type_delete_ancient(subject, predicate, DCAT['Dataset'])
 
     def generate_dependent_distribution_to_graph(self, subject, predicate):
-        self.add_rdf_type_delete_ancient(subject, predicate, DCAT['Distribution'])        
-
-    def generate_rights_to_graph(self, subject, predicate):
-        g = self.g
-        access_rights = g.value(subject, predicate)
-        if access_rights:
-            license_rights_ref = BNode()
-            g.remove((subject, predicate, None))
-            g.add((license_rights_ref, RDF.type, DCT.RightsStatement))
-            g.add((license_rights_ref, RDFS.label, Literal(access_rights)))
-            g.add((subject, predicate, license_rights_ref))
+        self.add_rdf_type_delete_ancient(subject, predicate, DCAT['Distribution'])

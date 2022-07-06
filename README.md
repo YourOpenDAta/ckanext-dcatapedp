@@ -210,7 +210,7 @@ To publish a new version to PyPI follow these steps:
 | adms:sample | extra:sample | M | list | | |
 | adms:versionNotes | adms:versionNotes | O | text | | |
 | dcat:landingPage | url | M | text | | |
-| dct:accessRights | extra:access_rights | M | text | | |
+| dct:accessRights | extra:access_rights | M | text | https://publications.europa.eu/resource/authority/access-right (not in the specification) | |
 | dct:accrualPeriodicity | extra:frequency | O | text | http://purl.org/cld/freq  | |
 | dct:conformsTo | extra:conforms_to | M | list | | |
 | dct:hasVersion | extra:has_version | O | list | | |
@@ -242,7 +242,7 @@ To publish a new version to PyPI follow these steps:
 | dct:issued | resource:issued | O | text |  |  |
 | dct:language | resource:languague | M | list | http://publications.europa.eu/resource/authority/language |  |
 | dct:modified | resource:modified | O | text |  |  |
-| dct:rights | resource:rights | M | text |  |  |
+| dct:rights | resource:rights | M | text | https://publications.europa.eu/resource/authority/access-right (not in the specification)  |  |
 | dct:title | resource:name | O | text |  |  |
 | foaf:page | resurce:documentation | M | list |  |  |
   |  |

@@ -13,7 +13,7 @@ from ckan.plugins import toolkit
 from ckanext.dcat.processors import RDFParser
 
 from ckanext.dcatapedp.profiles.namespaces import *
-from ckanext.dcatapedp.profiles.controlled_vocabularies import *
+from ckanext.dcatapedp.profiles.controlled_vocabularies.links import *
 
 
 class BaseParseTest(object):
@@ -226,7 +226,22 @@ class TestEDPDCATAPProfileSerializeDataset(BaseParseTest):
         assert extras['spatial'] == spatial_geom
         assert extras['spatial_centroid'] == spatial_centroid
 
-    # accessRights: tested in euro_dcat_ap profile
+    def test_access_rights(self):
+
+        access_rights_ref = URIRef('http://publications.europa.eu/resource/authority/access-right/RESTRICTED')
+
+        g, dataset_ref = self._get_base_graph()
+
+        g.add((dataset_ref, DCT['accessRights'], access_rights_ref))
+        g.add((access_rights_ref, RDF.type, DCT['RightsStatement']))
+
+        p = RDFParser(profiles=['euro_dcat_ap', 'dcat_ap_2.0.1'])
+        p.g = g
+
+        dataset = [d for d in p.datasets()][0]
+
+        extras = self._extras(dataset)
+        assert extras['access_rights'] == str(access_rights_ref)
 
     def test_conforms_to(self):
         conforms_to = '[\"Standard 1\", \"Standard 2\"]'
@@ -615,7 +630,21 @@ class TestEDPDCATAPProfileSerializeDataset(BaseParseTest):
 
         assert sorted(json.loads(resource['conforms_to'])) == conforms_to_list
     
-    # rights: tested in euro_dcat_ap profile
+    def test_distribution_rights(self):
+
+        rights_ref = URIRef('http://publications.europa.eu/resource/authority/access-right/RESTRICTED')
+
+        g, dataset_ref, distribution_ref = self._get_base_graph_with_resource()
+
+        g.add((distribution_ref, DCT['rights'], rights_ref))
+        g.add((rights_ref, RDF.type, DCT['RightsStatement']))
+
+        p = RDFParser(profiles=['euro_dcat_ap', 'dcat_ap_2.0.1'])
+        p.g = g
+        dataset = [d for d in p.datasets()][0]
+        resource = dataset.get('resources')[0]
+
+        assert resource['rights'] == str(rights_ref)
 
     def test_distribution_page_documentation(self):
         page_refs = '[\"http://pageDistribution1\", \"http://pageDistribution2\"]'

@@ -19,7 +19,7 @@
     <dct:modified rdf:datatype="http://www.w3.org/2001/XMLSchema#dateTime">2022-01-03T11:31:11.500592</dct:modified>
     <dct:conformsTo>Standard 2</dct:conformsTo>
     <dcat:keyword>newTag2</dcat:keyword>
-    <dct:accessRights>public</dct:accessRights>
+    <dct:accessRights>http://publications.europa.eu/resource/authority/access-right/RESTRICTED</dct:accessRights>
     <dct:isVersionOf rdf:resource="http://dataset2"/>
     <dct:accrualPeriodicity rdf:resource="http://purl.org/cld/freq/daily"/>
     <dcat:keyword>newTag</dcat:keyword>
@@ -54,7 +54,7 @@
         <foaf:page rdf:resource="http://pageDistribution1"/>
         <dct:issued rdf:datatype="http://www.w3.org/2001/XMLSchema#dateTime">2022-01-06T15:01:07.173973</dct:issued>
         <dct:conformsTo>Standard distribution 1</dct:conformsTo>
-        <dct:rights>Some statement about resource rights</dct:rights>
+        <dct:rights>http://publications.europa.eu/resource/authority/access-right/RESTRICTED</dct:rights>
         <dct:title>Example Resource</dct:title>
         <dcat:downloadURL rdf:resource="http://localhost/downloadURL"/>
         <dct:language rdf:resource="http://publications.europa.eu/resource/authority/language/FRA"/>
