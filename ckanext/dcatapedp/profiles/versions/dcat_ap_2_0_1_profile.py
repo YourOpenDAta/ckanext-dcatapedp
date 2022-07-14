@@ -208,7 +208,7 @@ class DCATAPProfile_2_0_1(DCATAPProfile_2):
                     pass
 
         # accessRights: change range to dct:RightsStatement
-        self.add_rdf_type(dataset_ref, DCT['accessRights'], DCT['RightsStatement'])
+        self.add_rdf_type_delete_ancient(dataset_ref, DCT['accessRights'], DCT['RightsStatement'])
 
         #conformsTo: change range to dct:Standard
         self.generate_conforms_to_graph(dataset_ref)

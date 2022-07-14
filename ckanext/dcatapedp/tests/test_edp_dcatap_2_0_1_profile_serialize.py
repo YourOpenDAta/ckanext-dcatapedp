@@ -552,7 +552,7 @@ class TestEDPDCATAPProfileSerializeDataset(BaseSerializeTest):
 
         def test_distribution_mediaType_with_mimetype(self):
             dataset, resource = self._get_base_dataset_and_resource()
-            resource['mimetype'] = 'application/json'
+            resource['mimetype'] = 'application/ld+json'
 
             s = RDFSerializer(profiles=['euro_dcat_ap', 'dcat_ap_2.0.1'])
             g = s.g
@@ -561,7 +561,7 @@ class TestEDPDCATAPProfileSerializeDataset(BaseSerializeTest):
                 g, dataset_ref, DCAT.distribution, None)[2]
             assert str(distribution) == utils.resource_uri(resource)
 
-            IANA_media_type_json = 'https://www.iana.org/assignments/media-types/application/json'
+            IANA_media_type_json = 'https://www.iana.org/assignments/media-types/application/ld+json'
             media_type = self._triple(
                 g, distribution, DCAT.mediaType, URIRef(IANA_media_type_json))[2]
             assert media_type

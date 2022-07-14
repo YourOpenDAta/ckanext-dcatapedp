@@ -478,15 +478,15 @@ class TestEDPDCATAPProfileSerializeDataset(BaseParseTest):
     if toolkit.check_ckan_version(min_version='2.3'):
         
         def test_distribution_format(self):
-            resource_format = 'JSON'
-            resource_mimetype = 'application/json'
+            resource_format = 'JSON_LD'
+            resource_mimetype = 'application/ld+json'
 
             g, dataset_ref, distribution_ref = self._get_base_graph_with_resource()
 
             EU_format_type_json_ref = URIRef(
-                'http://publications.europa.eu/resource/authority/file-type/JSON')
+                'http://publications.europa.eu/resource/authority/file-type/JSON_LD')
             IANA_media_type_json_ref = URIRef(
-                'https://www.iana.org/assignments/media-types/application/json')
+                'https://www.iana.org/assignments/media-types/application/ld+json')
 
             g.add((distribution_ref, DCT['format'], EU_format_type_json_ref))
             g.add((EU_format_type_json_ref, RDF['type'], DCT['MediaTypeOrExtent']))
@@ -504,12 +504,12 @@ class TestEDPDCATAPProfileSerializeDataset(BaseParseTest):
             assert resource['mimetype'] == resource_mimetype
 
         def test_distribution_format_not_mimetype(self):
-            resource_format = 'JSON'
+            resource_format = 'JSON_LD'
 
             g, dataset_ref, distribution_ref = self._get_base_graph_with_resource()
 
             EU_format_type_json_ref = URIRef(
-                'http://publications.europa.eu/resource/authority/file-type/JSON')
+                'http://publications.europa.eu/resource/authority/file-type/JSON_LD')
 
             g.add((distribution_ref, DCT['format'], EU_format_type_json_ref))
             g.add((EU_format_type_json_ref, RDF['type'], DCT['MediaTypeOrExtent']))
@@ -525,12 +525,12 @@ class TestEDPDCATAPProfileSerializeDataset(BaseParseTest):
 
         def test_distribution_format_not_format(self):
 
-            resource_mimetype = 'application/json'
+            resource_mimetype = 'application/ld+json'
 
             g, dataset_ref, distribution_ref = self._get_base_graph_with_resource()
 
             IANA_media_type_json_ref = URIRef(
-                'https://www.iana.org/assignments/media-types/application/json')
+                'https://www.iana.org/assignments/media-types/application/ld+json')
 
             g.add((distribution_ref, DCAT['mediaType'], IANA_media_type_json_ref))
             g.add((IANA_media_type_json_ref, RDF['type'], DCT['MediaType']))
@@ -547,14 +547,14 @@ class TestEDPDCATAPProfileSerializeDataset(BaseParseTest):
         def test_distribution_format_not_format_found_in_EU(self):
 
             resource_format = 'NotExists'
-            resource_mimetype = 'application/json'
+            resource_mimetype = 'application/ld+json'
 
             g, dataset_ref, distribution_ref = self._get_base_graph_with_resource()
 
             EU_format_type_json_ref = URIRef(
                 'http://publications.europa.eu/resource/authority/file-type/' + resource_format)
             IANA_media_type_json_ref = URIRef(
-                'https://www.iana.org/assignments/media-types/application/json')
+                'https://www.iana.org/assignments/media-types/application/ld+json')
 
             g.add((distribution_ref, DCT['format'], EU_format_type_json_ref))
             g.add((EU_format_type_json_ref, RDF['type'], DCT['MediaTypeOrExtent']))
