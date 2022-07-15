@@ -266,7 +266,7 @@ To publish a new version to PyPI follow these steps:
   - https://{ckan-instance-host}/oai?verb=Identify
   - https://{ckan-instance-host}/oai?verb=ListMetadataFormats
   - https://{ckan-instance-host}/oai?verb=ListSets
-  - https://{ckan-instance-host}/oai?verb=ListRecords&metadataPrefix=dcat
+  - **https://{ckan-instance-host}/oai?verb=ListRecords&metadataPrefix=dcat**
   - https://{ckan-instance-host}/oai?verb=ListIdentifiers&metadataPrefix=dcat&set=example_org
   - https://{ckan-instance-host}/oai?verb=GetRecord&identifier=ce3f7074-15b7-44ab-a2b9-85e26dc17f67&metadataPrefix=dcat
 
