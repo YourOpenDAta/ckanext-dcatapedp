@@ -12,8 +12,15 @@ from ckanext.dcat.processors import RDFSerializer
 # from ckanext.kata import helpers
 from ckanext.dcatapedp.profiles.utils import get_earliest_datestamp
 from oaipmh import common
+import oaipmh.server as oaisrv
+import oaipmh.metadata as oaimd
 from oaipmh.common import ResumptionOAIPMH
 from oaipmh.error import IdDoesNotExistError
+from ckanext.dcatapedp.oaipmh_edp.rdftools import rdf_reader, dcat2rdf_writer
+
+import xml.etree.ElementTree as ET
+
+import six
 
 log = logging.getLogger(__name__)
 
@@ -30,7 +37,7 @@ class CKANServer(ResumptionOAIPMH):
             repositoryName=config.get('ckan.site_title', 'repository'),
             baseURL=config.get('ckan.site_url', None) + url_for('oaipmh_edp.oai_action'),
             protocolVersion="2.0",
-            adminEmails=['etsin@csc.fi'],
+            adminEmails=['example@email.com'],
             earliestDatestamp= get_earliest_datestamp(),
             deletedRecord='no',
             granularity='YYYY-MM-DDThh:mm:ssZ',
@@ -205,6 +212,7 @@ class CKANServer(ResumptionOAIPMH):
         '''Show a selection of records, basically lists all datasets.
         '''
         data = []
+        log.info('cursor: %s | batch_size: %s', cursor, batch_size)
         packages, group = self._filter_packages(set, cursor, from_, until, batch_size)
         for package in packages:
             spec = package.name
@@ -234,3 +242,63 @@ class CKANServer(ResumptionOAIPMH):
         for dataset in groups:
             data.append((dataset.name, dataset.title, dataset.description))
         return data
+
+class CKANOAIPMHWrapper():
+    def __init__(self, resumption_batch_size=10) -> None:
+        client = CKANServer()
+        metadata_registry = oaimd.MetadataRegistry()
+        metadata_registry.registerReader('oai_dc', oaimd.oai_dc_reader)
+        metadata_registry.registerWriter('oai_dc', oaisrv.oai_dc_writer)
+        metadata_registry.registerReader('rdf', rdf_reader)
+        metadata_registry.registerWriter('rdf', dcat2rdf_writer)
+        metadata_registry.registerReader('dcat', rdf_reader)
+        metadata_registry.registerWriter('dcat', dcat2rdf_writer)
+        self.server = oaisrv.BatchingServer(client,
+                                metadata_registry=metadata_registry,
+                                resumption_batch_size=resumption_batch_size)
+        self.params = {}
+
+
+    def cleanParams(self, parms):
+        # if resumption token not other params allowed
+        self.params = mixed(parms)
+        if ('resumptionToken' in self.params):
+                verb = self.params['verb']
+                resumptionToken = self.params['resumptionToken']
+                self.params = {'verb': verb, 'resumptionToken': resumptionToken}
+        log.info('req params %s', self.params)
+    
+    def handleResponse(self, res):
+            # add info to the resumptionToken
+            ET.register_namespace('', oaisrv.NS_OAIPMH)
+            root = ET.fromstring(res)
+            log.info(root)
+            root.set('{%s}schemaLocation' % oaisrv.NS_XSI,
+                     (oaisrv.NS_OAIPMH,
+                      'http://www.openarchives.org/OAI/2.0/OAI-PMH.xsd'))
+            child = root.find(oaisrv.nsoai(self.params['verb']))
+            if child != None:
+                tokenElement = child.find(oaisrv.nsoai("resumptionToken"))
+                if tokenElement != None:
+                    log.info(tokenElement)
+                    log.info(tokenElement.text)
+                    token, cursor = oaisrv.decodeResumptionToken(tokenElement.text)
+                    log.info('token %s | cursor %s', token, cursor)
+                    tokenElement.attrib["cursor"] = str(cursor)
+                    tokenElement.attrib["completeListSize"] = token['batch_size']
+                    log.info(tokenElement.attrib)
+            return ET.tostring(root, encoding='utf8', xml_declaration= True, method = 'xml')
+
+    def handleRequest(self, params):
+        self.cleanParams(params)
+        return self.server.handleRequest(self.params)
+
+
+def mixed(multi_dict):
+    u'''Return a dict with values being lists if they have more than one
+        item or a string otherwise
+    '''
+    out = {}
+    for key, value in six.iteritems(multi_dict.to_dict(flat=False)):
+        out[key] = value[0] if len(value) == 1 else value
+    return out

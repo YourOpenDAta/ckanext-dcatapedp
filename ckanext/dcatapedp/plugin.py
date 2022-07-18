@@ -4,16 +4,12 @@ from ckan.plugins import implements, SingletonPlugin
 from ckan.plugins import IConfigurer, IBlueprint
 from flask import Blueprint
 
-import oaipmh.metadata as oaimd
-import oaipmh.server as oaisrv
+
 from ckan.plugins.toolkit import request
 
-
 from ckan.lib.base import render
-from ckanext.dcatapedp.oaipmh_edp.oaipmh_server import CKANServer
-from ckanext.dcatapedp.oaipmh_edp.rdftools import rdf_reader, dcat2rdf_writer
+from ckanext.dcatapedp.oaipmh_edp.oaipmh_server import CKANOAIPMHWrapper
 
-import six
 
 
 from ckan.lib.base import render
@@ -22,42 +18,29 @@ from ckan.lib.base import render
 
 log = logging.getLogger(__name__)
 
-def mixed(multi_dict):
-    u'''Return a dict with values being lists if they have more than one
-        item or a string otherwise
-    '''
-    out = {}
-    for key, value in six.iteritems(multi_dict.to_dict(flat=False)):
-        out[key] = value[0] if len(value) == 1 else value
-    return out
+
 
 def oai_action():
     '''Return the result of the handled request of a batching OAI-PMH
     server implementation.
     '''
-    log.error('Entra')
+    log.info('Entres in the action')
     if 'verb' in request.params:
         verb = request.params['verb'] if request.params['verb'] else None
         if verb:            
-            client = CKANServer()
-            metadata_registry = oaimd.MetadataRegistry()
-            metadata_registry.registerReader('oai_dc', oaimd.oai_dc_reader)
-            metadata_registry.registerWriter('oai_dc', oaisrv.oai_dc_writer)
-            metadata_registry.registerReader('rdf', rdf_reader)
-            metadata_registry.registerWriter('rdf', dcat2rdf_writer)
-            metadata_registry.registerReader('dcat', rdf_reader)
-            metadata_registry.registerWriter('dcat', dcat2rdf_writer)
-            serv = oaisrv.BatchingServer(client,
-                                            metadata_registry=metadata_registry,
-                                            resumption_batch_size=10)
-            parms = mixed(request.params)
-            res = serv.handleRequest(parms)
+            serv = CKANOAIPMHWrapper(5)
+            res = serv.handleRequest(request.params)
+            #log.info('Response: %s', res)
+            resProcessed = serv.handleResponse(res)
+            #log.info('Response processed: %s', resProcessed )
+            
             #response.headers['content-type'] = 'text/html; charset=utf-8'
-            return res
+            return resProcessed
     else:
         #TODO: return error no verb try with no verb
         return render('oaipmh_edp/oaipmh.html')
 
+   
 
 class OAIPMHPlugin(SingletonPlugin):
     '''OAI-PMH plugin, maps the controller and uses the template configuration
