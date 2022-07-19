@@ -272,22 +272,17 @@ class CKANOAIPMHWrapper():
             # add info to the resumptionToken
             ET.register_namespace('', oaisrv.NS_OAIPMH)
             root = ET.fromstring(res)
-            log.info(root)
-            root.set('{%s}schemaLocation' % oaisrv.NS_XSI,
-                     (oaisrv.NS_OAIPMH,
-                      'http://www.openarchives.org/OAI/2.0/OAI-PMH.xsd'))
             child = root.find(oaisrv.nsoai(self.params['verb']))
             if child != None:
                 tokenElement = child.find(oaisrv.nsoai("resumptionToken"))
                 if tokenElement != None:
-                    log.info(tokenElement)
-                    log.info(tokenElement.text)
                     token, cursor = oaisrv.decodeResumptionToken(tokenElement.text)
                     log.info('token %s | cursor %s', token, cursor)
-                    tokenElement.attrib["cursor"] = str(cursor)
-                    tokenElement.attrib["completeListSize"] = token['batch_size']
-                    log.info(tokenElement.attrib)
-            return ET.tostring(root, encoding='utf8', xml_declaration= True, method = 'xml')
+                    batch_size = token['batch_size']
+                    newToken = f'<resumptionToken cursor="{cursor}" completeListSize="{batch_size}">'.encode('utf-8')
+                    res = res.replace(b'<resumptionToken>', newToken)
+                    #log.info(res)
+            return res
 
     def handleRequest(self, params):
         self.cleanParams(params)

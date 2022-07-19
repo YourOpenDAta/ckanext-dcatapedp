@@ -28,7 +28,7 @@ def oai_action():
     if 'verb' in request.params:
         verb = request.params['verb'] if request.params['verb'] else None
         if verb:            
-            serv = CKANOAIPMHWrapper(5)
+            serv = CKANOAIPMHWrapper(10)
             res = serv.handleRequest(request.params)
             #log.info('Response: %s', res)
             resProcessed = serv.handleResponse(res)
