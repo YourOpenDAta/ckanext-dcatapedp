@@ -32,7 +32,6 @@
 -->
 
 # ckanext-dcatapedp <!-- omit in toc -->
-`TODO: Include badges`
 
 CKAN extension for the European Data Portal
 
@@ -55,8 +54,8 @@ CKAN extension for the European Data Portal
 
 ## Requirements
 
-- The extension was developed for CKAN 2.9 `TODO: test in other versions`
-- It is based on the [ckanext-dcat extension](https://github.com/ckan/ckanext-dcat "ckanext-dcat extension") v1.1.3 `TODO: test in other versions`
+- The extension was developed for CKAN 2.9
+- It is based on the [ckanext-dcat extension](https://github.com/ckan/ckanext-dcat "ckanext-dcat extension") v1.1.3
 
 
 
