@@ -83,6 +83,7 @@ setup(
         oaipmh_edp=ckanext.dcatapedp.plugin:OAIPMHPlugin
         [ckan.rdf.profiles]
         dcat_ap_2.0.1=ckanext.dcatapedp.profiles.versions.dcat_ap_2_0_1_profile:DCATAPProfile_2_0_1
+        dcat_ap_2.1.0=ckanext.dcatapedp.profiles.versions.dcat_ap_2_1_0_profile:DCATAPProfile_2_1_0
 
         [babel.extractors]
         ckan = ckan.lib.extract:extract_ckan

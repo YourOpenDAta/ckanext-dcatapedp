@@ -174,6 +174,10 @@ class CKANServer(ResumptionOAIPMH):
             return self._record_for_dataset_dcat(package, spec, profiles=['euro_dcat_ap'])
         if metadataPrefix == 'dcat':
             return self._record_for_dataset_dcat(package, spec, profiles=['euro_dcat_ap', 'dcat_ap_2.0.1'])
+        if metadataPrefix == 'dcat_2.0.1':
+            return self._record_for_dataset_dcat(package, spec, profiles=['euro_dcat_ap', 'dcat_ap_2.0.1'])
+        if metadataPrefix == 'dcat_2.1.0':
+            return self._record_for_dataset_dcat(package, spec, profiles=['euro_dcat_ap', 'dcat_ap_2.1.0'])
         return self._record_for_dataset(package, spec)
 
     def listIdentifiers(self, metadataPrefix=None, set=None, cursor=None,
@@ -205,6 +209,12 @@ class CKANServer(ResumptionOAIPMH):
                  'http://www.openarchives.org/OAI/2.0/rdf/'),
                  ('dcat',
                  'http://www.openarchives.org/OAI/2.0/rdf.xsd',
+                 'http://www.openarchives.org/OAI/2.0/rdf/'),
+                ('dcat_2.0.1',
+                 'http://www.openarchives.org/OAI/2.0/rdf.xsd',
+                 'http://www.openarchives.org/OAI/2.0/rdf/'),
+                ('dcat_2.1.0',
+                 'http://www.openarchives.org/OAI/2.0/rdf.xsd',
                  'http://www.openarchives.org/OAI/2.0/rdf/')]
 
     def listRecords(self, metadataPrefix=None, set=None, cursor=None, from_=None,
@@ -227,6 +237,10 @@ class CKANServer(ResumptionOAIPMH):
                 data.append(self._record_for_dataset_dcat(package, spec, profiles=['euro_dcat_ap']))
             elif metadataPrefix == 'dcat':
                 data.append(self._record_for_dataset_dcat(package, spec, profiles=['euro_dcat_ap', 'dcat_ap_2.0.1']))
+            elif metadataPrefix == 'dcat_2.0.1':
+                data.append(self._record_for_dataset_dcat(package, spec, profiles=['euro_dcat_ap', 'dcat_ap_2.0.1']))
+            elif metadataPrefix == 'dcat_2.1.0':
+                data.append(self._record_for_dataset_dcat(package, spec, profiles=['euro_dcat_ap', 'dcat_ap_2.1.0']))
             else:
                 data.append(self._record_for_dataset(package, spec))
         return data
@@ -253,6 +267,10 @@ class CKANOAIPMHWrapper():
         metadata_registry.registerWriter('rdf', dcat2rdf_writer)
         metadata_registry.registerReader('dcat', rdf_reader)
         metadata_registry.registerWriter('dcat', dcat2rdf_writer)
+        metadata_registry.registerReader('dcat_2.0.1', rdf_reader)
+        metadata_registry.registerWriter('dcat_2.0.1', dcat2rdf_writer)
+        metadata_registry.registerReader('dcat_2.1.0', rdf_reader)
+        metadata_registry.registerWriter('dcat_2.1.0', dcat2rdf_writer)
         self.server = oaisrv.BatchingServer(client,
                                 metadata_registry=metadata_registry,
                                 resumption_batch_size=resumption_batch_size)

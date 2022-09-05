@@ -36,10 +36,11 @@
 CKAN extension for the European Data Portal
 
 - [Requirements](#requirements)
+- [DCAT versions included](#dcat-versions-included)
 - [Installation](#installation)
 - [Development Installation](#development-installation)
 - [Running the Tests](#running-the-tests)
-- [Mapping CKAN - DCAT AP v 2.0.1](#mapping-ckan---dcat-ap-v-201)
+- [Mapping CKAN - DCAT AP v x.x.x](#mapping-ckan---dcat-ap-v-xxx)
   - [Catalogue - Organization](#catalogue---organization)
   - [Dataset - Package](#dataset---package)
   - [Distribution - Resource](#distribution---resource)
@@ -49,7 +50,7 @@ CKAN extension for the European Data Portal
   - [Dataset (Package) and Distribution (Resource) CKAN metadata](#dataset-package-and-distribution-resource-ckan-metadata)
   - [Dataset (Package) and Distribution (Resource) DCAT-AP rdf](#dataset-package-and-distribution-resource-dcat-ap-rdf)
   - [Catalogue (Organization) CKAN metadata](#catalogue-organization-ckan-metadata)
-  - [Catalogue (Organization) DCAT-AP v2.0.1 rdf](#catalogue-organization-dcat-ap-v201-rdf)
+  - [Catalogue (Organization) DCAT-AP vx.x.x rdf](#catalogue-organization-dcat-ap-vxxx-rdf)
 - [License](#license)
 
 ## Requirements
@@ -58,7 +59,10 @@ CKAN extension for the European Data Portal
 - It is based on the [ckanext-dcat extension](https://github.com/ckan/ckanext-dcat "ckanext-dcat extension") v1.1.3
 
 
+## DCAT versions included
 
+1. 2.0.1
+2. 2.1.0
 
 ## Installation
 
@@ -76,9 +80,9 @@ CKAN extension for the European Data Portal
 
         pip install -e ckanext-dcatapedp
 
-5. Active the dcat_ap_2.0.1 profile and add the oaipmh_edp plugin  in the `production.ini` file:
+5. Active the dcat_ap_x.x.x profile and add the oaipmh_edp plugin  in the `production.ini` file:
 
-        ckanext.dcat.rdf.profiles = euro_dcat_ap dcat_ap_2.0.1
+        ckanext.dcat.rdf.profiles = euro_dcat_ap dcat_ap_x.x.x
         ckan.plugins = (other plugins) oaipmh_edp
 
 6. Restart CKAN. For example if you've deployed CKAN with Apache on Ubuntu::
@@ -174,13 +178,13 @@ To publish a new version to PyPI follow these steps:
 
 -->
 
-## Mapping CKAN - DCAT AP v 2.0.1
+## Mapping CKAN - DCAT AP v x.x.x
  - **DCAT prop**: dcat property name
  - **CKAN fields**: field or fields used for the mapping with the DCAT edp profile. CKAN fields are sorted by order of preference in the CKAN metadata
  - **Type**: origin of the dcat mapping being 
    - *O: taken from original profile without modifying it (euro_dcat_ap)*; 
    - *M: taken from the original profile (euro_dcat_ap) modifying it*; 
-   - *A: new property added in the dcat_ap_2.0.1 profile*
+   - *A: new property added in the dcat_ap_x.x.x profile*
  - **Stored as**: way it is stored in the CKAN instance
  - **Ref. vocab.**: reference vocabularies recommended to use
  - **Notes**: additional information 
@@ -209,7 +213,7 @@ To publish a new version to PyPI follow these steps:
 | adms:sample | extra:sample | M | list | | |
 | adms:versionNotes | adms:versionNotes | O | text | | |
 | dcat:landingPage | url | M | text | | |
-| dct:accessRights | extra:access_rights | M | text | https://publications.europa.eu/resource/authority/access-right (not in the specification) | |
+| dct:accessRights | extra:access_rights | M | text | https://publications.europa.eu/resource/authority/access-right (not in the specification) [2.0.1] -> <br/> http://publications.europa.eu/resource/authority/access-right [2.1.0] | |
 | dct:accrualPeriodicity | extra:frequency | O | text | http://purl.org/cld/freq  | |
 | dct:conformsTo | extra:conforms_to | M | list | | |
 | dct:hasVersion | extra:has_version | O | list | | |
@@ -219,7 +223,7 @@ To publish a new version to PyPI follow these steps:
 | dct:modified | extra:modified, <br/> metadata_modified | O | text | | |
 | dct:provenance | extra:provenance | M | text | | |
 | dct:source | extra:source | M | list | | |
-| dct:type | extra:dcat_type | M | text | | |
+| dct:type | extra:dcat_type | M | text | () -> http://publications.europa.eu/resource/dataset/dataset-type [2.1.0] | |
 | foaf:page | extra:documentation | M | list  | | |
 | owl:versionInfo | version, extra:dcat_version | O | text | | |
 
@@ -229,7 +233,7 @@ To publish a new version to PyPI follow these steps:
 | DCAT prop. | CKAN fields | Type | Stored as | Ref. vocab. | Notes |
 | ------------ | ------------ | ------------ | ------------ | ------------ | ------------ |
 | dcat:accessURL | resource:access_url | O | text |  |  |
-| dcatap:availability | resource:availability | A | text | http://data.europa.eu/r5r/availability/ <br/> https://www.dcat-ap.de/def/plannedAvailability/1_0.html |  |
+| dcatap:availability | resource:availability | A | text | http://data.europa.eu/r5r/availability/ <br/> https://www.dcat-ap.de/def/plannedAvailability/1_0.html -> [2.0.1] <br/> http://publications.europa.eu/resource/authority/planned-availability -> [2.1.0] |  |
 | dct:description | resource:description | O | text |  |  |
 | dct:format | resource:format | M | text | http://publications.europa.eu/resource/authority/file-type |  |
 | dct:license | resource:license | M | text | TODO:include |  |
@@ -277,18 +281,18 @@ To publish a new version to PyPI follow these steps:
 
 - Original profile (`euro_dcat_ap`): 
 
-- DCAT-AP v2.0.1 (`euro_dcat_ap` `dcat_ap_2.0.1`): [ckan_dataset_edp_2_0_1.json](examples/ckan_dataset_edp_2_0_1.json)
+- DCAT-AP v x.x.x (`euro_dcat_ap` `dcat_ap_x.x.x`): [ckan_dataset_edp_x_x_x.json](examples/ckan_dataset_edp_x_x_x.json)
 
 
 ### Dataset (Package) and Distribution (Resource) DCAT-AP rdf
 - Original profile (`euro_dcat_ap`): [ckan_dataset_edp_original.rdf](examples/ckan_dataset_edp_original.rdf)
 
-- DCAT-AP v2.0.1 (`euro_dcat_ap` `dcat_ap_2.0.1`): [ckan_dataset_edp_2_0_1.rdf](examples/ckan_dataset_edp_2_0_1.rdf)
+- DCAT-AP vx.x.x (`euro_dcat_ap` `dcat_ap_x.x.x`): [ckan_dataset_edp_2_0_1.rdf](examples/ckan_dataset_edp_2_0_1.rdf)
 
 
 ### Catalogue (Organization) CKAN metadata
 
-### Catalogue (Organization) DCAT-AP v2.0.1 rdf
+### Catalogue (Organization) DCAT-AP vx.x.x rdf
 
 
 ## License
