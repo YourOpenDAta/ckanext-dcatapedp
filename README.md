@@ -82,7 +82,7 @@ CKAN extension for the European Data Portal
 
 5. Active the dcat_ap_x.x.x profile and add the oaipmh_edp plugin  in the `production.ini` file:
 
-        ckanext.dcat.rdf.profiles = euro_dcat_ap dcat_ap_x.x.x
+        ckanext.dcat.rdf.profiles = euro_dcat_ap dcat_ap_x.x.x (dcat_ap_2.1.0 or dcat_ap.2.0.1)
         ckan.plugins = (other plugins) oaipmh_edp
 
 6. Restart CKAN. For example if you've deployed CKAN with Apache on Ubuntu::
