@@ -1,4 +1,5 @@
 import json
+import datetime
 from builtins import str
 
 from ckan.plugins import toolkit
@@ -338,7 +339,19 @@ class DCATAPProfile_2_0_1(DCATAPProfile_2):
             self.add_rdf_type(distribution, ADMS['status'], SKOS['Concept']) 
 
             # dct:license change range to dct:LicenseDocument
-            self.add_rdf_type(distribution, DCT['license'], DCT['LicenseDocument'])           
+            self.add_rdf_type(distribution, DCT['license'], DCT['LicenseDocument'])   
+
+            # dct:modified
+            #near-real time data sources
+            modified = str(datetime.datetime.now() - datetime.timedelta(hours=5))
+            self._add_date_triple(distribution, DCT['modified'], modified)
+
+            #dct:issued
+            temporal_ref = g.value(dataset_ref, DCT.temporal, None)
+            if temporal_ref:
+                start_dist = self._get_dataset_value(dataset_dict, 'temporal_start')
+                if start_dist:
+                    self._add_date_triple(distribution, DCT['issued'], start_dist)
 
     def graph_from_catalog(self, catalog_dict, catalog_ref):
 
