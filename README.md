@@ -290,11 +290,6 @@ To publish a new version to PyPI follow these steps:
 - DCAT-AP vx.x.x (`euro_dcat_ap` `dcat_ap_x.x.x`): [ckan_dataset_edp_2_0_1.rdf](examples/ckan_dataset_edp_2_0_1.rdf)
 
 
-### Catalogue (Organization) CKAN metadata
-
-### Catalogue (Organization) DCAT-AP vx.x.x rdf
-
-
 ## License
 
 ckandext-dcatapedp is open and licensed under the GNU Affero General Public License (AGPL) v3.0 whose full text may be found at:
